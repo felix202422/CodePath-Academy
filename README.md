@@ -10,7 +10,7 @@ it imports licensed curriculum and stores the published content in its own datab
 > **Status:** active development. This repository is not deployed. The current development machine
 > has Node.js 24, Maven, Java 25, and PostgreSQL 18; Docker and Java 21 are not installed. The
 > PostgreSQL service is running, but local database credentials have not been configured for this
-> project. GitHub write authentication is also not configured.
+> project. Git push works through stored credentials; the GitHub CLI is not authenticated.
 
 ## Repositories
 

@@ -8,7 +8,7 @@
 
 | Phase | Scope | Status | Evidence / blocker |
 |---|---|---|---|
-| 0 — Project creation and planning | Repository audit, source audit, architecture, standards, register | Done | Academy repo verified public and empty, cloned with `origin`; Masterclass audited read-only (MIT); directory structure, README, architecture, development standards, content-integration strategy, changelog, and this register committed. Remaining limitation: GitHub issue/milestone tracking and pushes need `gh auth login`. |
+| 0 — Project creation and planning | Repository audit, source audit, architecture, standards, register | Done | Academy repo verified public and empty, cloned with `origin`; Masterclass audited read-only (MIT); directory structure, README, architecture, development standards, content-integration strategy, changelog, and this register committed and pushed (root commit `8c3ef41` verified via GitHub API). Limitation: `gh` CLI is unauthenticated, so GitHub issues/milestones need `gh auth login`; plain Git push works via stored credentials. |
 | 1 — Technical foundation | React/Vite, Spring Boot, PostgreSQL, Flyway, Docker/CI, tests | In Progress | Toolchain and project skeleton being established. Docker and Java 21 are unavailable locally; DB credentials are not configured. |
 | 2 — UI/UX foundation | Tokens, shared components, responsive public/student/admin shells | Backlog | — |
 | 3 — Authentication and security | Registration, approval, login/logout, admin bootstrap, authorization | Backlog | — |
@@ -41,6 +41,7 @@
 | 2026-11-10 | `pg_isready -h localhost -p 5432` | Passed | Local PostgreSQL 18 accepts connections. |
 | 2026-11-10 | `psql -w -h localhost -U postgres -d postgres ...` | Blocked | No password supplied; project DB credentials are not configured. |
 | 2026-11-10 | `docker --version` | Blocked | Docker CLI is not installed. |
-| 2026-11-10 | `gh auth status` | Blocked | Not logged into GitHub; remote writes cannot be performed. |
+| 2026-11-10 | `gh auth status` | Blocked | GitHub CLI not logged in; issues/milestones cannot be managed until `gh auth login`. |
+| 2026-11-10 | `git push -u origin main` + GitHub API commit check | Passed | Phase 0 root commit `8c3ef41` pushed and verified on `felix202422/CodePath-Academy`. |
 
 Feature-specific test results will be added as those features are implemented.

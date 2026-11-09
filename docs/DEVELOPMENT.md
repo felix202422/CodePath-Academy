@@ -19,7 +19,7 @@
 | PostgreSQL client/server | 18 | Installed; service accepts connections on localhost:5432. |
 | PostgreSQL project credentials | Not configured | `postgres` connection without a password was rejected. Do not put credentials in Git. |
 | Docker | Not found | Compose configuration can be authored, but cannot be run here unless Docker is installed. |
-| GitHub CLI | 2.102.0 | Installed but not authenticated. Public reads work; pushes and GitHub administration need `gh auth login`. |
+| GitHub CLI | 2.102.0 | Installed but not authenticated. Public API reads work without it; Git push works via stored credentials (verified); issue/milestone administration needs `gh auth login`. |
 
 The repository is cloned from the verified, public, empty application repository. Its `origin` is
 `https://github.com/felix202422/CodePath-Academy.git`. The current workspace has no pre-existing
