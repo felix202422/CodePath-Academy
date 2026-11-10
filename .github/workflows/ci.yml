@@ -73,6 +73,6 @@ jobs:
           push: false
       - uses: docker/build-push-action@v6
         with:
-          context: frontend
+          context: .
           file: infra/docker/Dockerfile.frontend
           push: false

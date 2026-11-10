@@ -1,14 +1,16 @@
-# Multi-stage build: install, test, build the SPA, serve with Nginx.
+# Multi-stage build. This image is built from the REPOSITORY ROOT context:
+#   docker build -f infra/docker/Dockerfile.frontend .
+# (nginx.conf lives in infra/docker/, outside frontend/, so the root context is required.)
 FROM node:24-alpine AS build
 WORKDIR /app
-COPY package.json package-lock.json ./
+COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-fund --no-audit
-COPY . .
+COPY frontend/ ./
 RUN npm run build
 
 FROM nginx:1.29-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY infra/docker/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget -qO- http://localhost/healthz || exit 1
