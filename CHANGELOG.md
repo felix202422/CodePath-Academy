@@ -24,5 +24,13 @@ All notable changes to CodePath-Academy are documented here. Format follows
   and authorization rules on every admin endpoint; frontend auth API with `useSession`
   query, login and registration pages (React Hook Form + Zod), role-based route guards with
   correct redirects, and sign-out in all three shells.
+- Phase 4: public academy — Flyway V2 seed of 7 published learning paths and 20 courses
+  (titles, summaries, levels, and prerequisite chains from the audited CodePath-Masterclass
+  commit `62afa41`, with the Computer Networking path kept as a draft); public catalog API
+  (`/api/v1/public/overview|paths|courses` with details, PUBLISHED-only, honest 404s);
+  homepage with live catalog counts and start-here courses, course catalog with learning-path
+  filters, course detail pages with prerequisite chains, module/lesson counts, source
+  provenance, and an honest notice while lesson content has not yet been imported, learning
+  path listing and detail pages.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

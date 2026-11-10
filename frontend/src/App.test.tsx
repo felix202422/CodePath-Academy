@@ -80,7 +80,7 @@ describe('App routing', () => {
     expect(await screen.findByTestId('api-status')).toHaveTextContent('UP');
   });
 
-  it('renders the public shell and placeholder for the course catalog', async () => {
+  it('renders the public shell with the real course catalog', async () => {
     mockApi(null);
 
     renderApp('/courses');
@@ -88,6 +88,9 @@ describe('App routing', () => {
     expect(await screen.findByRole('heading', { level: 1, name: 'Course catalog' })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
+    // The catalog fetch fails against this mock; the page reports it honestly
+    // instead of rendering placeholder courses.
+    expect(await screen.findByRole('alert')).toBeInTheDocument();
   });
 
   it('renders the student shell at /student for an authenticated student', async () => {

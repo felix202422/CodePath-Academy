@@ -15,10 +15,12 @@ export function AboutPage() {
         <Card>
           <CardTitle>How the curriculum is built</CardTitle>
           <CardDescription>
-            Course content is imported from the CodePath-Masterclass repository (MIT
-            licensed) through a repeatable, audited importer that records the exact source
-            commit for every import. Imported lessons are stored by the academy, so your
-            learning never depends on GitHub availability.
+            Course titles, summaries, levels, and prerequisite chains come from the
+            CodePath-Masterclass repository (MIT licensed), audited at a pinned commit
+            and recorded with source provenance on every course. Lesson content follows
+            through a repeatable, source-aware import process; until lessons are
+            imported and reviewed, course pages say so plainly instead of showing
+            content that does not exist yet.
           </CardDescription>
         </Card>
         <Card>

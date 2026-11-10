@@ -20,8 +20,11 @@ and cite the source repository and commit.
 
 ## Initial path mapping
 
-These are draft learning paths, not claims of complete programs. Courses are published only after
-the imported content and ordering have been reviewed.
+These are draft learning paths, not claims of complete programs. The public catalog
+publishes course *metadata* (titles, summaries, levels, prerequisites) seeded from the
+audited source once a path is reviewed; lesson content rows are never seeded — they
+enter the database only through the importer below and stay invisible until an
+administrator publishes them.
 
 | Academy path | Candidate source subjects | Audit note |
 |---|---|---|

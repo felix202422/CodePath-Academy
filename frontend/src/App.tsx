@@ -4,7 +4,11 @@ import { PublicLayout } from './components/layout/PublicLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
 import { NotFoundPage } from './features/errors/NotFoundPage';
 import { AboutPage } from './features/public/AboutPage';
+import { CatalogPage } from './features/public/CatalogPage';
+import { CourseDetailPage } from './features/public/CourseDetailPage';
 import { HomePage } from './features/public/HomePage';
+import { LearningPathsPage } from './features/public/LearningPathsPage';
+import { PathDetailPage } from './features/public/PathDetailPage';
 import { PlaceholderPage } from './features/shared/PlaceholderPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
@@ -12,8 +16,9 @@ import { RequireRole } from './features/auth/RequireRole';
 
 /**
  * Route tree. Layouts establish the public/student/admin shells (Phase 2);
- * screens whose features are not built yet render an honest phase placeholder
- * instead of fake data. Protected routes use server-derived roles for navigation;
+ * the public academy screens read the real catalog API (Phase 4); screens
+ * whose features are not built yet render an honest phase placeholder instead
+ * of fake data. Protected routes use server-derived roles for navigation;
  * backend authorization remains the security boundary.
  */
 export default function App() {
@@ -21,26 +26,10 @@ export default function App() {
     <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
-        <Route
-          path="/courses"
-          element={
-            <PlaceholderPage
-              title="Course catalog"
-              phase="Phase 4 — Public academy"
-              description="Browse published courses by subject, level, and duration, with full course details and curricula."
-            />
-          }
-        />
-        <Route
-          path="/paths"
-          element={
-            <PlaceholderPage
-              title="Learning paths"
-              phase="Phase 4 — Public academy"
-              description="Compare structured paths — software engineering, cybersecurity, networking, and emerging technologies — and see how courses connect."
-            />
-          }
-        />
+        <Route path="/courses" element={<CatalogPage />} />
+        <Route path="/courses/:slug" element={<CourseDetailPage />} />
+        <Route path="/paths" element={<LearningPathsPage />} />
+        <Route path="/paths/:slug" element={<PathDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
