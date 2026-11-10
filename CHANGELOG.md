@@ -14,5 +14,9 @@ All notable changes to CodePath-Academy are documented here. Format follows
   React 19 + Vite 8 + TypeScript 5.9 + Tailwind 4 frontend with typed API client, design tokens,
   and health status page; Dockerfiles, Nginx reverse proxy, Docker Compose stack, and GitHub
   Actions CI (frontend, backend with PostgreSQL service, container builds).
+- Phase 2: UI/UX foundation — shared component library (Button, form fields with ARIA wiring,
+  Card, Badge, Alert, Spinner, EmptyState, accessible Modal), responsive header with mobile
+  menu, public/student/admin layout shells, home and about pages, honest phase placeholders,
+  and a 404 page.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

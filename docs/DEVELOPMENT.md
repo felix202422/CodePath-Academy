@@ -84,5 +84,7 @@ npm run dev   # http://localhost:5173, proxies /api and /actuator to the API
 
 The current environment lacks a Java 21 runtime (Java 25 compiles with `--release 21`) and Docker.
 Java 25 can compile with `--release 21`, but that does not substitute for validating the app on
-Java 21, and container images/Compose cannot be run here. These constraints are reflected in test
-records; no test is reported as passed unless it was actually run.
+Java 21, and container images/Compose cannot be run here. **GitHub Actions compensates**: every
+push runs the frontend suite, the backend suite on Temurin 21 against a `postgres:18` service, and
+builds both container images (first green run verified on `d53d85a`). These constraints are
+reflected in test records; no test is reported as passed unless it was actually run.
