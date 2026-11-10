@@ -1,0 +1,27 @@
+# Test profile: runs against a real PostgreSQL instance.
+# CI provides a postgres service; locally use the development cluster documented in
+# docs/DEVELOPMENT.md (or set DB_URL/DB_USERNAME/DB_PASSWORD explicitly).
+spring:
+  datasource:
+    url: ${TEST_DB_URL:jdbc:postgresql://localhost:5433/codepath_academy_test}
+    username: ${TEST_DB_USERNAME:codepath_academy}
+    password: ${TEST_DB_PASSWORD:}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+app:
+  web:
+    cors-allowed-origins: http://localhost:5173
+    cookie-secure: false
+  bootstrap-admin:
+    enabled: false
+    email: ""
+    password: ""
+  curriculum:
+    repository: felix202422/CodePath-Masterclass
+    local-checkout-path: ""
+  media:
+    root: ./data/test-media

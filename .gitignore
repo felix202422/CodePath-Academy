@@ -10,6 +10,7 @@ node_modules/
 frontend/dist/
 frontend/coverage/
 frontend/.vite/
+*.tsbuildinfo
 npm-debug.log*
 
 # Java / Maven

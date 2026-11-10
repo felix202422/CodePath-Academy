@@ -9,7 +9,7 @@
 | Phase | Scope | Status | Evidence / blocker |
 |---|---|---|---|
 | 0 — Project creation and planning | Repository audit, source audit, architecture, standards, register | Done | Academy repo verified public and empty, cloned with `origin`; Masterclass audited read-only (MIT); directory structure, README, architecture, development standards, content-integration strategy, changelog, and this register committed and pushed (root commit `8c3ef41` verified via GitHub API). Limitation: `gh` CLI is unauthenticated, so GitHub issues/milestones need `gh auth login`; plain Git push works via stored credentials. |
-| 1 — Technical foundation | React/Vite, Spring Boot, PostgreSQL, Flyway, Docker/CI, tests | In Progress | Toolchain and project skeleton being established. Docker and Java 21 are unavailable locally; DB credentials are not configured. |
+| 1 — Technical foundation | React/Vite, Spring Boot, PostgreSQL, Flyway, Docker/CI, tests | Done | Backend Spring Boot 3.5.16 with Flyway V1 on real PostgreSQL 18.6: `mvn verify` → 8/8 tests pass. Frontend React 19 + Vite 8: `npm test` → 9/9 pass, `npm run build` and `npm run lint` pass. Live stack verified: API on `:8081` (env process owns `:8080`) serving health/actuator/OpenAPI, 401/403 JSON + CSRF cookie + security headers confirmed by curl, SPA on `:5173` renders live DB-backed status with 0 console errors. Dockerfiles, Compose, and CI workflow authored; Docker is absent locally so image builds run in CI only. |
 | 2 — UI/UX foundation | Tokens, shared components, responsive public/student/admin shells | Backlog | — |
 | 3 — Authentication and security | Registration, approval, login/logout, admin bootstrap, authorization | Backlog | — |
 | 4 — Public academy | Homepage, catalog, details, paths, public information | Backlog | — |
@@ -25,9 +25,9 @@
 
 | ID | Item | Priority | Status |
 |---|---|---:|---|
-| CPA-001 | Establish frontend/backend monorepo and reproducible local build | P0 | In Progress |
-| CPA-002 | Add Flyway baseline and PostgreSQL connection configuration | P0 | To Do |
-| CPA-003 | Add CI checks for frontend, backend, migrations, and dependency auditing | P1 | To Do |
+| CPA-001 | Establish frontend/backend monorepo and reproducible local build | P0 | Done |
+| CPA-002 | Add Flyway baseline and PostgreSQL connection configuration | P0 | Done |
+| CPA-003 | Add CI checks for frontend, backend, migrations, and dependency auditing | P1 | In Progress |
 | CPA-004 | Implement registration, status, and bootstrap administrator flow | P0 | Backlog |
 | CPA-005 | Implement source-aware curriculum importer and review workflow | P0 | Backlog |
 | CPA-006 | Provide secure session/CSRF and authorization tests | P0 | Backlog |
@@ -39,9 +39,19 @@
 | 2026-11-10 | GitHub API: academy repository metadata | Passed | `felix202422/CodePath-Academy` is public and empty; verified before cloning. |
 | 2026-11-10 | GitHub API: Masterclass tree and license | Passed | Public tree returned, `truncated=false`; MIT license. |
 | 2026-11-10 | `pg_isready -h localhost -p 5432` | Passed | Local PostgreSQL 18 accepts connections. |
-| 2026-11-10 | `psql -w -h localhost -U postgres -d postgres ...` | Blocked | No password supplied; project DB credentials are not configured. |
+| 2026-11-10 | `psql -w -h localhost -U postgres -d postgres ...` | Blocked | System service on 5432 rejects passwordless access; no project credentials exist for it. Workaround: isolated project cluster on 5433 (see below). |
 | 2026-11-10 | `docker --version` | Blocked | Docker CLI is not installed. |
 | 2026-11-10 | `gh auth status` | Blocked | GitHub CLI not logged in; issues/milestones cannot be managed until `gh auth login`. |
 | 2026-11-10 | `git push -u origin main` + GitHub API commit check | Passed | Phase 0 root commit `8c3ef41` pushed and verified on `felix202422/CodePath-Academy`. |
+| 2026-11-10 | Isolated PostgreSQL cluster on `localhost:5433` (`pg_ctl`/`pg_isready`) | Passed | Project dev cluster under `data/pgdata` (gitignored); databases `codepath_academy` and `codepath_academy_test` created; system service on 5432 untouched. |
+| 2026-11-10 | `mvn -B test` (backend, real PostgreSQL 18.6) | Passed | 8/8 tests: `ApplicationSmokeTest` 2, `SecurityAuthorizationTest` 6; Flyway applied V1 to `codepath_academy_test`. |
+| 2026-11-10 | `mvn -B -q verify` (CI-equivalent backend command) | Passed | Exit code 0; test schema already at v1 ("No migration necessary"). |
+| 2026-11-10 | `npm test` (Vitest 5) | Passed | 9/9 tests: API client contract (5), ApiStatus component (2), App routing (2). |
+| 2026-11-10 | `npm run build` (`tsc -b` + Vite 8) | Passed | Exit 0; 140 modules, 292.12 kB JS (91.89 kB gzip), 9.51 kB CSS. |
+| 2026-11-10 | `npm run lint` (ESLint 10 flat config) | Passed | 0 errors, 0 warnings. |
+| 2026-11-10 | Live API: `GET :8081/api/v1/health`, `/actuator/health`, `/api/v1/openapi.json` | Passed | 200 with `{"status":"UP",...}`; actuator reports liveness/readiness groups; OpenAPI 3.1 doc served; server run applied Flyway V1 to `codepath_academy`. |
+| 2026-11-10 | Live security checks via curl | Passed | `/api/v1/me` and `/api/v1/admin/students` → 401 JSON; `POST /api/v1/admin/courses` without CSRF → 403 JSON; `XSRF-TOKEN` cookie issued; `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`, CSP present. |
+| 2026-11-10 | End-to-end: Vite dev server `:5173` → proxy → API `:8081` → PostgreSQL | Passed | SPA rendered Status `UP`, service `codepath-academy`, live server time; browser console 0 errors. |
+| 2026-11-10 | `docker build` / `docker compose up` | Blocked | Docker CLI not installed; images and Compose authored, build job defined in CI. |
 
 Feature-specific test results will be added as those features are implemented.

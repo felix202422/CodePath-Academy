@@ -27,12 +27,62 @@ project files.
 
 ## Local configuration
 
-1. Copy `.env.example` to `.env` and set a dedicated local PostgreSQL database/user/password.
-2. Keep `.env` untracked. Never put real values in `application.yml`, test fixtures, or logs.
-3. Start the database using Docker Compose or an existing PostgreSQL 18 service.
-4. Run Flyway migrations via the backend. Production must use migrations, not Hibernate DDL.
-5. Start the API and frontend using the commands added to their package/build manifests.
+Secrets come from environment variables only (see `.env.example`). Keep `.env` untracked and never
+put real values in `application.yml`, test fixtures, or logs. Flyway runs automatically at startup;
+production must use migrations, never Hibernate DDL.
 
-The current environment lacks a Java 21 runtime, Docker, and project database credentials. Java 25
-can compile with `--release 21`, but that does not substitute for validating the app on Java 21. These
-constraints will be reflected in test records; no test will be reported as passed unless run.
+### Database (this machine)
+
+The system PostgreSQL service on port 5432 is password-protected and its credentials are not part of
+this project, so development uses an **isolated cluster** under `data/pgdata` (gitignored) on
+**port 5433** with trust auth. It never touches the system service.
+
+```powershell
+# Start the dev cluster (repeat after a machine/environment restart)
+& 'C:\Program Files\PostgreSQL\18\bin\pg_ctl.exe' -D 'D:\Documents\Codepath-Academy\data\pgdata' `
+  -o "-p 5433" -l 'D:\Documents\Codepath-Academy\data\pg.log' start
+& 'C:\Program Files\PostgreSQL\18\bin\pg_isready.exe' -h localhost -p 5433
+```
+
+One-time creation (already done on this machine):
+
+```powershell
+& 'C:\Program Files\PostgreSQL\18\bin\createdb.exe' -h localhost -p 5433 -U codepath_academy codepath_academy
+& 'C:\Program Files\PostgreSQL\18\bin\createdb.exe' -h localhost -p 5433 -U codepath_academy codepath_academy_test
+```
+
+### Backend
+
+```powershell
+$env:DB_URL="jdbc:postgresql://localhost:5433/codepath_academy"
+$env:DB_USERNAME="codepath_academy"
+$env:DB_PASSWORD=""
+$env:SERVER_PORT="8081"       # only if port 8080 is occupied on this machine
+mvn -B spring-boot:run         # http://localhost:8081 (or :8080)
+mvn -B test                    # runs against codepath_academy_test on 5433
+```
+
+Note: on this machine port 8080 is held by an unrelated environment process
+(`AgentService`), so local runs use `SERVER_PORT=8081` and the frontend proxy target is set with
+`API_PROXY_TARGET=http://localhost:8081`. Defaults remain 8080 elsewhere.
+
+Tests use the `test` profile (`src/test/resources/application-test.yml`), which points at
+`codepath_academy_test` on port 5433 by default and honors `TEST_DB_URL` / `TEST_DB_USERNAME` /
+`TEST_DB_PASSWORD` overrides — CI supplies these against its Postgres service container.
+
+### Frontend
+
+```powershell
+npm ci        # or npm install
+npm test      # Vitest
+npm run lint  # ESLint
+$env:API_PROXY_TARGET="http://localhost:8081"  # when the API is not on :8080
+npm run dev   # http://localhost:5173, proxies /api and /actuator to the API
+```
+
+## Known constraints
+
+The current environment lacks a Java 21 runtime (Java 25 compiles with `--release 21`) and Docker.
+Java 25 can compile with `--release 21`, but that does not substitute for validating the app on
+Java 21, and container images/Compose cannot be run here. These constraints are reflected in test
+records; no test is reported as passed unless it was actually run.

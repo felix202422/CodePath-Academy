@@ -1,0 +1,67 @@
+server:
+  port: 8080
+  error:
+    include-message: never
+    include-stacktrace: never
+
+spring:
+  application:
+    name: codepath-academy
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/codepath_academy}
+    username: ${DB_USERNAME:codepath_academy}
+    password: ${DB_PASSWORD:}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  session:
+    jdbc:
+      initialize-schema: never
+      table-name: SPRING_SESSION
+    timeout: 30m
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 12MB
+
+app:
+  web:
+    cors-allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    cookie-secure: ${APP_COOKIE_SECURE:false}
+  bootstrap-admin:
+    enabled: ${APP_BOOTSTRAP_ADMIN_ENABLED:false}
+    email: ${APP_BOOTSTRAP_ADMIN_EMAIL:}
+    password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}
+  curriculum:
+    repository: ${APP_CURRICULUM_REPOSITORY:felix202422/CodePath-Masterclass}
+    local-checkout-path: ${APP_CURRICULUM_LOCAL_PATH:}
+  media:
+    root: ${APP_MEDIA_ROOT:./data/media}
+
+springdoc:
+  api-docs:
+    path: /api/v1/openapi.json
+  swagger-ui:
+    path: /api/v1/swagger.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    root: INFO
