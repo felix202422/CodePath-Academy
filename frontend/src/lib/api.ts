@@ -18,7 +18,37 @@ export class ApiRequestError extends Error {
 /** Reads the CSRF cookie Spring Security sets (XSRF-TOKEN) for the double-submit pattern. */
 function csrfToken(): string | undefined {
   const match = document.cookie.match(/(?:^|;\s*)XSRF-TOKEN=([^;]+)/);
-  return match?.[1];
+  const encoded = match?.[1];
+  if (!encoded) return undefined;
+  try {
+    return decodeURIComponent(encoded);
+  } catch {
+    return encoded;
+  }
+}
+
+/**
+ * The SPA's first request may be a mutation (for example, a direct visit to
+ * /login followed by an immediate submit). Ensure Spring has issued its
+ * readable double-submit cookie before sending it.
+ */
+async function ensureCsrfToken(): Promise<string> {
+  const current = csrfToken();
+  if (current) return current;
+
+  const response = await fetch('/api/v1/health', {
+    method: 'GET',
+    credentials: 'same-origin',
+  });
+  if (!response.ok) {
+    throw new ApiRequestError(response.status, 'Could not initialize request security. Please try again.');
+  }
+
+  const initialized = csrfToken();
+  if (!initialized) {
+    throw new ApiRequestError(403, 'Could not initialize request security. Please refresh and try again.');
+  }
+  return initialized;
 }
 
 interface RequestOptions extends Omit<RequestInit, 'body'> {
@@ -26,16 +56,15 @@ interface RequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const method = options.method ?? 'GET';
+  const method = (options.method ?? 'GET').toUpperCase();
   const headers = new Headers(options.headers);
 
   if (options.body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }
 
-  const token = csrfToken();
-  if (token && method !== 'GET' && method !== 'HEAD') {
-    headers.set('X-XSRF-TOKEN', token);
+  if (!['GET', 'HEAD', 'OPTIONS'].includes(method)) {
+    headers.set('X-XSRF-TOKEN', await ensureCsrfToken());
   }
 
   const response = await fetch(path, {

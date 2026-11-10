@@ -1,17 +1,20 @@
 package com.codepath.academy.security;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import java.util.Locale;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 /**
@@ -22,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
 class SecurityAuthorizationTest {
 
     @Autowired
@@ -49,9 +53,17 @@ class SecurityAuthorizationTest {
 
     @Test
     void csrfCookieIsIssuedForTheSpa() throws Exception {
-        mockMvc.perform(get("/api/v1/health"))
+        var result = mockMvc.perform(get("/api/v1/health"))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Set-Cookie", org.hamcrest.Matchers.containsString("XSRF-TOKEN")));
+                .andReturn();
+        var csrfCookieHeader = result.getResponse().getHeaders("Set-Cookie").stream()
+                .filter(value -> value.startsWith("XSRF-TOKEN="))
+                .findFirst()
+                .orElse(null);
+        assertNotNull(csrfCookieHeader, "The SPA needs an XSRF-TOKEN cookie on a safe GET; Set-Cookie headers="
+                + result.getResponse().getHeaders("Set-Cookie"));
+        assertFalse(csrfCookieHeader.toLowerCase(Locale.ROOT).contains("httponly"),
+                "The SPA must be able to echo the CSRF cookie in a header");
     }
 
     @Test

@@ -1,7 +1,9 @@
-import { Outlet, useNavigate } from 'react-router';
+import { Outlet } from 'react-router';
+import { Alert } from '../ui/Alert';
 import { Badge } from '../ui/Badge';
 import { Button } from '../ui/Button';
 import { AppHeader, type NavItem } from './AppHeader';
+import { useLogout } from '../../features/auth/useSession';
 
 const ADMIN_NAV: NavItem[] = [
   { to: '/admin', label: 'Dashboard', end: true },
@@ -18,7 +20,7 @@ const ADMIN_NAV: NavItem[] = [
  * Admin authentication is wired in Phase 3.
  */
 export function AdminLayout() {
-  const navigate = useNavigate();
+  const logout = useLogout();
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
@@ -33,11 +35,16 @@ export function AdminLayout() {
           </span>
         }
         actions={
-          <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
-            Sign in
+          <Button variant="outline" size="sm" loading={logout.isPending} onClick={() => logout.mutate()}>
+            Sign out
           </Button>
         }
       />
+      {logout.error && (
+        <div className="mx-auto mt-4 w-full max-w-6xl px-4 sm:px-6">
+          <Alert tone="danger">{logout.error.message}</Alert>
+        </div>
+      )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         <Outlet />
       </main>

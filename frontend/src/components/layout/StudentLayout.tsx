@@ -1,6 +1,8 @@
-import { Outlet, useNavigate } from 'react-router';
+import { Outlet } from 'react-router';
+import { Alert } from '../ui/Alert';
 import { Button } from '../ui/Button';
 import { AppHeader, type NavItem } from './AppHeader';
+import { useLogout } from '../../features/auth/useSession';
 
 const STUDENT_NAV: NavItem[] = [
   { to: '/student', label: 'Dashboard', end: true },
@@ -14,18 +16,23 @@ const STUDENT_NAV: NavItem[] = [
  * Phase 3; until then this shell only establishes the navigation structure.
  */
 export function StudentLayout() {
-  const navigate = useNavigate();
+  const logout = useLogout();
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
       <AppHeader
         items={STUDENT_NAV}
         actions={
-          <Button variant="outline" size="sm" onClick={() => navigate('/login')}>
-            Switch account
+          <Button variant="outline" size="sm" loading={logout.isPending} onClick={() => logout.mutate()}>
+            Sign out
           </Button>
         }
       />
+      {logout.error && (
+        <div className="mx-auto mt-4 w-full max-w-6xl px-4 sm:px-6">
+          <Alert tone="danger">{logout.error.message}</Alert>
+        </div>
+      )}
       <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
         <Outlet />
       </main>

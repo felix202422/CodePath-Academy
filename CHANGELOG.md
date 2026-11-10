@@ -18,5 +18,11 @@ All notable changes to CodePath-Academy are documented here. Format follows
   Card, Badge, Alert, Spinner, EmptyState, accessible Modal), responsive header with mobile
   menu, public/student/admin layout shells, home and about pages, honest phase placeholders,
   and a 404 page.
+- Phase 3: authentication and security — backend session-cookie auth (Spring Session JDBC)
+  with double-submit CSRF, registration → administrator approval workflow, login/logout with
+  honest JSON 401/403 responses, failed-login lockout, idempotent env-var admin bootstrap,
+  and authorization rules on every admin endpoint; frontend auth API with `useSession`
+  query, login and registration pages (React Hook Form + Zod), role-based route guards with
+  correct redirects, and sign-out in all three shells.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

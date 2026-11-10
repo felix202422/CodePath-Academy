@@ -19,18 +19,58 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-function mockHealthOk() {
-  vi.spyOn(globalThis, 'fetch').mockResolvedValue(
-    new Response(
-      JSON.stringify({ status: 'UP', service: 'codepath-academy', time: '2026-11-10T00:00:00Z' }),
-      { status: 200 },
-    ),
-  );
+interface SessionFixture {
+  id: string;
+  email: string;
+  fullName: string;
+  role: 'STUDENT' | 'ADMIN';
+  status: 'ACTIVE';
 }
+
+/**
+ * Routes fetch by URL: the session probe answers with the fixture (or 401 for
+ * anonymous visitors) and health answers with the Phase 1 payload.
+ */
+function mockApi(session: SessionFixture | null = null) {
+  vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
+    const url = String(input);
+    const json = (body: unknown, status: number) =>
+      new Response(JSON.stringify(body), {
+        status,
+        headers: { 'Content-Type': 'application/json' },
+      });
+
+    if (url.includes('/api/v1/auth/me')) {
+      return session
+        ? json(session, 200)
+        : json({ message: 'Authentication required' }, 401);
+    }
+    if (url.includes('/api/v1/health')) {
+      return json({ status: 'UP', service: 'codepath-academy', time: '2026-11-10T00:00:00Z' }, 200);
+    }
+    return json({ message: 'Not found' }, 404);
+  });
+}
+
+const student: SessionFixture = {
+  id: 's-1',
+  email: 'student@example.com',
+  fullName: 'Sam Student',
+  role: 'STUDENT',
+  status: 'ACTIVE',
+};
+
+const admin: SessionFixture = {
+  id: 'a-1',
+  email: 'admin@example.com',
+  fullName: 'Ada Admin',
+  role: 'ADMIN',
+  status: 'ACTIVE',
+};
 
 describe('App routing', () => {
   it('renders the academy home page at the root path', async () => {
-    mockHealthOk();
+    mockApi(null);
 
     renderApp('/');
 
@@ -40,37 +80,67 @@ describe('App routing', () => {
     expect(await screen.findByTestId('api-status')).toHaveTextContent('UP');
   });
 
-  it('renders the public shell and placeholder for the course catalog', () => {
+  it('renders the public shell and placeholder for the course catalog', async () => {
+    mockApi(null);
+
     renderApp('/courses');
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Course catalog' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { level: 1, name: 'Course catalog' })).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 
-  it('renders the student shell at /student', () => {
+  it('renders the student shell at /student for an authenticated student', async () => {
+    mockApi(student);
+
     renderApp('/student');
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Student dashboard' }),
+      await screen.findByRole('heading', { level: 1, name: 'Student dashboard' }),
     ).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'My learning' })).toBeInTheDocument();
   });
 
-  it('renders the admin shell at /admin', () => {
+  it('renders the admin shell at /admin for an authenticated administrator', async () => {
+    mockApi(admin);
+
     renderApp('/admin');
 
     expect(
-      screen.getByRole('heading', { level: 1, name: 'Administration dashboard' }),
+      await screen.findByRole('heading', { level: 1, name: 'Administration dashboard' }),
     ).toBeInTheDocument();
     expect(screen.getByText('Administration')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Audit log' })).toBeInTheDocument();
   });
 
-  it('renders a 404 page for unknown paths', () => {
+  it('redirects an anonymous visitor from /student to the sign-in page', async () => {
+    mockApi(null);
+
+    renderApp('/student');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Sign in to your account' }),
+    ).toBeInTheDocument();
+  });
+
+  it('redirects a student away from the admin area to their own dashboard', async () => {
+    mockApi(student);
+
+    renderApp('/admin');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Student dashboard' }),
+    ).toBeInTheDocument();
+  });
+
+  it('renders a 404 page for unknown paths', async () => {
+    mockApi(null);
+
     renderApp('/definitely/not/a/route');
 
-    expect(screen.getByRole('heading', { level: 1, name: 'Page not found' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Page not found' }),
+    ).toBeInTheDocument();
   });
 });
