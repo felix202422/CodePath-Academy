@@ -63,5 +63,6 @@
 | 2026-11-10 | Phase 3: `npm test` (Vitest) | Passed | 38/38 tests across 8 files: App routing incl. role guards (7), auth pages (5), layouts with session wiring (4), ApiStatus (2), API client (5), Button (4), Field (6), Modal (5). |
 | 2026-11-10 | Phase 3: `npm run build` + `npm run lint` | Passed | tsc + Vite: 2301 modules, 442.69 kB JS (137.12 kB gzip), 21.28 kB CSS; ESLint 0 errors/warnings. Added `@hookform/resolvers@7.0.5` (pinned). |
 | 2026-11-10 | Phase 3: browser E2E of the full auth workflow | Passed | Register student → success message; pending student sign-in refused with "Your registration is awaiting administrator approval."; bootstrap admin signs in → lands on `/admin`; approves the request via `POST /api/v1/admin/registrations/{id}/approve`; student signs in → lands on `/student`; student navigating to `/admin` redirected back to `/student`; sign-out clears the session and returns to sign-in. 0 console errors. Bootstrap admin created from local `APP_BOOTSTRAP_ADMIN_*` env vars only (not committed). |
+| 2026-11-10 | GitHub Actions run 4 (`04bd46a`, Phase 3) | Passed | All 3 jobs green (frontend, backend with PostgreSQL service, container images). |
 
 Feature-specific test results will be added as those features are implemented.
