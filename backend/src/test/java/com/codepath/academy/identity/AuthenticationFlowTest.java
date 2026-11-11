@@ -12,8 +12,10 @@ import com.codepath.academy.identity.model.UserRole;
 import com.codepath.academy.identity.model.UserStatus;
 import com.codepath.academy.identity.repository.AppUserRepository;
 import com.codepath.academy.identity.repository.RegistrationRequestRepository;
+import com.codepath.academy.support.SecurityTestSupport;
 import jakarta.servlet.http.Cookie;
 import java.util.UUID;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -22,6 +24,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * End-to-end authentication contract against real PostgreSQL:
@@ -38,6 +41,9 @@ class AuthenticationFlowTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext wac;
 
     @Autowired
     private AppUserRepository userRepository;
@@ -180,6 +186,20 @@ class AuthenticationFlowTest {
                         .content("{not json"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.status").value(400));
+    }
+
+    // --- helpers -----------------------------------------------------------
+
+    /**
+     * Every {@code .with(csrf())} request above makes spring-security-test overwrite the
+     * shared CsrfFilter's repository with a session-backed one for the rest of the
+     * context's life. Restore the production cookie repository after each test so later
+     * test classes never observe sessions created by anonymous reads, regardless of
+     * test order.
+     */
+    @AfterEach
+    void restoreProductionCsrfRepository() {
+        SecurityTestSupport.restoreCookieCsrfRepository(wac);
     }
 
     // --- helpers -----------------------------------------------------------

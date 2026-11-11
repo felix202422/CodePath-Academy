@@ -7,7 +7,10 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.codepath.academy.support.SecurityTestSupport;
 import java.util.Locale;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Security contract tests. Every protected endpoint must deny anonymous callers and
@@ -30,6 +34,20 @@ class SecurityAuthorizationTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    /**
+     * This class issues {@code .with(csrf())} requests; spring-security-test swaps the
+     * shared CsrfFilter repository to a session-backed one and never swaps it back.
+     * Restore the production cookie repository so tests running after this class
+     * (notably the public no-session contract) do not depend on class order.
+     */
+    @AfterEach
+    void restoreProductionCsrfRepository() {
+        SecurityTestSupport.restoreCookieCsrfRepository(wac);
+    }
 
     @Test
     void adminApiRejectsAnonymousCallers() throws Exception {

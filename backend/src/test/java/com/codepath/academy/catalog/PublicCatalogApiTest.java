@@ -12,7 +12,9 @@ import com.codepath.academy.catalog.model.CourseLevel;
 import com.codepath.academy.catalog.model.LearningPath;
 import com.codepath.academy.catalog.repository.CourseRepository;
 import com.codepath.academy.catalog.repository.LearningPathRepository;
+import com.codepath.academy.support.SecurityTestSupport;
 import java.util.UUID;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -20,6 +22,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.WebApplicationContext;
 
 /**
  * Public catalog contract: anonymous reads over PUBLISHED content only, real
@@ -41,6 +44,21 @@ class PublicCatalogApiTest {
 
     @Autowired
     private LearningPathRepository pathRepository;
+
+    @Autowired
+    private WebApplicationContext wac;
+
+    /**
+     * The no-session contract must be evaluated against the repository the application
+     * ships with. Earlier test classes that issue {@code .with(csrf())} requests leave
+     * the shared CsrfFilter on a session-backed test repository (spring-security-test
+     * swaps it and does not swap it back), which would make this class's session
+     * assertions depend on test order. Reset before each test.
+     */
+    @BeforeEach
+    void useProductionCsrfRepository() {
+        SecurityTestSupport.restoreCookieCsrfRepository(wac);
+    }
 
     @Test
     void overviewReportsPublishedCountsAndCurriculumOrder() throws Exception {
