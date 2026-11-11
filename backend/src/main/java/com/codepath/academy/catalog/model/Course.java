@@ -55,6 +55,10 @@ public class Course {
     @Column(name = "source_repository", length = 200)
     private String sourceRepository;
 
+    /** Source subject directory (e.g. 04-JAVA-PROGRAMMING); see V3 migration. */
+    @Column(name = "source_path", length = 500)
+    private String sourcePath;
+
     @Column(name = "display_order", nullable = false)
     private int displayOrder;
 
@@ -133,6 +137,19 @@ public class Course {
 
     public void setDisplayOrder(int displayOrder) {
         this.displayOrder = displayOrder;
+    }
+
+    public void setEstimatedHours(Integer estimatedHours) {
+        this.estimatedHours = estimatedHours;
+    }
+
+    /** Source subject directory this course maps to; null for academy-only courses. */
+    public void setSourcePath(String sourcePath) {
+        this.sourcePath = sourcePath;
+    }
+
+    public String getSourcePath() {
+        return sourcePath;
     }
 
     public String getDescription() {

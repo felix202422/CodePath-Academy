@@ -10,6 +10,9 @@ import { HomePage } from './features/public/HomePage';
 import { LearningPathsPage } from './features/public/LearningPathsPage';
 import { PathDetailPage } from './features/public/PathDetailPage';
 import { PlaceholderPage } from './features/shared/PlaceholderPage';
+import { AdminContentPage } from './features/admin/AdminContentPage';
+import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
+import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RequireRole } from './features/auth/RequireRole';
@@ -104,26 +107,9 @@ export default function App() {
               />
             }
           />
-          <Route
-            path="courses"
-            element={
-              <PlaceholderPage
-                title="Courses"
-                phase="Phase 5 — Course management"
-                description="Create paths, courses, modules, and lessons; control draft and publication state."
-              />
-            }
-          />
-          <Route
-            path="content"
-            element={
-              <PlaceholderPage
-                title="Content import"
-                phase="Phase 5 — Course management"
-                description="Run source-aware curriculum imports from CodePath-Masterclass with an audited review workflow."
-              />
-            }
-          />
+          <Route path="courses" element={<AdminCoursesPage />} />
+          <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
+          <Route path="content" element={<AdminContentPage />} />
           <Route
             path="announcements"
             element={

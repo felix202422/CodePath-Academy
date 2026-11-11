@@ -26,7 +26,8 @@ public record AppProperties(
 
     public record Curriculum(
             String repository,
-            String localCheckoutPath
+            String localCheckoutPath,
+            String commit
     ) {}
 
     public record Media(

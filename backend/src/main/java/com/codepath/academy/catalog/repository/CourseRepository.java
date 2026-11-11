@@ -23,6 +23,19 @@ public interface CourseRepository extends JpaRepository<Course, UUID> {
 
     List<Course> findTop4ByStatusOrderByDisplayOrderAsc(ContentStatus status);
 
+    /** All courses of a path regardless of status (administrator views). */
+    List<Course> findByLearningPathIdOrderByDisplayOrderAsc(UUID learningPathId);
+
+    boolean existsBySlug(String slug);
+
+    Optional<Course> findBySourcePath(String sourcePath);
+
+    long countByLearningPathId(UUID learningPathId);
+
+    /** Next display order tail for courses inside one path. */
+    @Query("SELECT COALESCE(MAX(c.displayOrder), 0) FROM Course c WHERE c.learningPathId = :pathId")
+    int maxDisplayOrderForPath(@Param("pathId") UUID pathId);
+
     /**
      * Prerequisites of one course in the order the audited source lists them.
      * Native because course_prerequisite is a join table without its own

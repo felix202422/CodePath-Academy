@@ -37,5 +37,9 @@ All notable changes to CodePath-Academy are documented here. Format follows
   royalty-free course photographs, browser-local favorites, a registration CTA, visible
   reduced-motion-aware hover/focus and result-transition effects;
   unavailable popularity, ratings, duration, enrollment, and price data remain omitted.
+- Phase 5 course management: administrator path/course/module/lesson authoring with publication
+  gates, a provenance-aware curriculum importer for local and remote sources, media/link rewriting,
+  an idempotent import ledger with conflict accept/discard review, and admin content screens. All
+  imported material remains draft until an administrator publishes it.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

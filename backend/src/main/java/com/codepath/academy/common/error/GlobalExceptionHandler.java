@@ -3,6 +3,7 @@ package com.codepath.academy.common.error;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -83,6 +84,16 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiError.of(
                 HttpStatus.NOT_FOUND.value(), "Not found",
                 "The requested resource does not exist.", request.getRequestURI()));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleDataIntegrity(DataIntegrityViolationException ex,
+                                                        HttpServletRequest request) {
+        // Unique/check constraints are the race-safe backstop behind service pre-checks
+        // (duplicate slugs, source hashes, module source mappings).
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ApiError.of(
+                HttpStatus.CONFLICT.value(), "Conflict",
+                "The request conflicts with existing data.", request.getRequestURI()));
     }
 
     @ExceptionHandler(ApiException.class)

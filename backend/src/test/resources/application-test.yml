@@ -22,6 +22,7 @@ app:
     password: ""
   curriculum:
     repository: felix202422/CodePath-Masterclass
+    commit: ""
     local-checkout-path: ""
   media:
     root: ./data/test-media

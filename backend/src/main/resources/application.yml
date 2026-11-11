@@ -42,6 +42,9 @@ app:
     password: ${APP_BOOTSTRAP_ADMIN_PASSWORD:}
   curriculum:
     repository: ${APP_CURRICULUM_REPOSITORY:felix202422/CodePath-Masterclass}
+    # Optional immutable pin. Empty resolves the repository's default branch head
+    # at import time; the resolved commit is recorded on every import row.
+    commit: ${APP_CURRICULUM_COMMIT:}
     local-checkout-path: ${APP_CURRICULUM_LOCAL_PATH:}
   media:
     root: ${APP_MEDIA_ROOT:./data/media}
