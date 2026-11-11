@@ -40,9 +40,11 @@ describe('PublicLayout', () => {
 
     const nav = await screen.findByRole('navigation', { name: 'Primary' });
     expect(nav).toHaveTextContent('Courses');
-    expect(nav).toHaveTextContent('Learning paths');
-    expect(screen.getByRole('button', { name: 'Sign in' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Register' })).toBeInTheDocument();
+    expect(nav).toHaveTextContent('Career Paths');
+    expect(nav).toHaveTextContent('About Us');
+    expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Apply Now' })).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search for courses' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 

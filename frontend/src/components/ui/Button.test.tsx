@@ -25,7 +25,15 @@ describe('Button', () => {
   it('stays clickable when disabled is not set', () => {
     render(<Button variant="outline">Continue</Button>);
 
-    expect(screen.getByRole('button', { name: 'Continue' })).toBeEnabled();
+    const button = screen.getByRole('button', { name: 'Continue' });
+    expect(button).toBeEnabled();
+    expect(button).toHaveClass(
+      'cursor-pointer',
+      'hover:-translate-y-0.5',
+      'hover:shadow-sm',
+      'active:scale-[0.98]',
+    );
+    expect(button).toHaveClass('motion-reduce:transition-none');
   });
 
   it('renders a native submit button when type=submit', () => {

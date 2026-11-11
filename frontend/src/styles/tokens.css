@@ -1,14 +1,22 @@
 @import 'tailwindcss';
 
 /*
- * Design tokens for CodePath-Academy. The palette is fixed by the project brief;
- * components must use these tokens (via Tailwind theme vars) instead of one-off colors.
+ * Design tokens for CodePath-Academy. The public catalog follows the recorded
+ * indigo/violet reference; shared components consume these tokens rather than
+ * introducing one-off brand colors.
  */
 @theme {
-  --color-navy-950: #0b1630;
-  --color-navy-900: #142544;
-  --color-accent-600: #2563eb;
-  --color-accent-500: #3b82f6;
+  --color-navy-950: #17163f;
+  --color-navy-900: #28245f;
+  --color-accent-50: #eef2ff;
+  --color-accent-100: #e0e7ff;
+  --color-accent-200: #c7d2fe;
+  --color-accent-400: #818cf8;
+  --color-accent-500: #6366f1;
+  --color-accent-600: #4f46e5;
+  --color-accent-700: #4338ca;
+  --color-violet-600: #7c3aed;
+  --color-violet-700: #6d28d9;
   --color-canvas: #f8fafc;
   --color-surface: #ffffff;
   --color-ink: #172033;
@@ -26,6 +34,45 @@ html {
   font-family: var(--font-sans);
   color: var(--color-ink);
   background: var(--color-canvas);
+}
+
+@keyframes catalog-results-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes catalog-menu-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.catalog-results-enter > li {
+  animation: catalog-results-enter 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+.catalog-menu-enter {
+  animation: catalog-menu-enter 180ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .catalog-results-enter > li,
+  .catalog-menu-enter {
+    animation: none;
+  }
 }
 
 :focus-visible {

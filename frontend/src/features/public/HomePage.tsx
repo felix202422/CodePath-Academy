@@ -1,4 +1,4 @@
-import { BookOpen, FolderKanban, Route, ShieldCheck } from 'lucide-react';
+import { BookOpen, Code2, FolderKanban, Route, ShieldCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { ApiStatus } from '../health/ApiStatus';
 import { Button } from '../../components/ui/Button';
@@ -9,6 +9,7 @@ import { ApiRequestError } from '../../lib/api';
 import { CourseCard } from './CourseCard';
 import { PathCard } from './PathCard';
 import { useOverview } from './useCatalog';
+import { useFavoriteCourses } from './useFavoriteCourses';
 
 const FEATURES = [
   {
@@ -43,35 +44,55 @@ const FEATURES = [
  */
 export function HomePage() {
   const overview = useOverview();
+  const favorites = useFavoriteCourses();
 
   return (
     <div>
-      <section className="bg-navy-950 px-4 py-16 text-white sm:px-6 sm:py-24">
-        <div className="mx-auto max-w-6xl">
-          <p className="text-sm font-semibold tracking-wide text-blue-300 uppercase">
-            CodePath Academy
-          </p>
-          <h1 className="mt-3 max-w-3xl text-4xl font-bold sm:text-6xl">
-            Learn. Build. Innovate. Become.
-          </h1>
-          <p className="mt-5 max-w-2xl text-lg text-slate-300">
-            Structured technology courses, practical exercises, assessments, and real-world
-            projects — organized into learning paths that take you from fundamentals to
-            job-ready skills.
-          </p>
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Link to="/courses">
-              <Button size="lg">Browse courses</Button>
-            </Link>
-            <Link to="/paths">
-              <Button
-                size="lg"
-                variant="outline"
-                className="border-slate-500 bg-transparent text-white hover:bg-white/10"
-              >
-                Explore learning paths
-              </Button>
-            </Link>
+      <section className="overflow-hidden border-b border-accent-100 bg-accent-50 px-4 py-14 sm:px-6 sm:py-20">
+        <div className="mx-auto grid max-w-7xl items-center gap-8 md:grid-cols-[1fr_21rem]">
+          <div className="max-w-3xl">
+            <p className="text-xs font-bold tracking-[0.16em] text-accent-700 uppercase">
+              CodePath Academy
+            </p>
+            <h1 className="mt-3 text-4xl font-bold tracking-tight text-navy-950 sm:text-6xl">
+              Learn. Build. Innovate. <span className="text-accent-600">Become.</span>
+            </h1>
+            <p className="mt-5 max-w-2xl text-lg leading-7 text-ink-muted">
+              Structured technology courses, practical exercises, assessments, and real-world
+              projects — organized into learning paths that take you from fundamentals to
+              job-ready skills.
+            </p>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Link to="/courses">
+                <Button size="lg">Browse courses</Button>
+              </Link>
+              <Link to="/paths">
+                <Button size="lg" variant="outline">
+                  Explore learning paths
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <div aria-hidden="true" className="relative mx-auto hidden h-48 w-full max-w-sm md:block">
+            <div className="absolute inset-x-8 top-3 bottom-1 rotate-[-5deg] rounded-3xl bg-violet-600/10" />
+            <div className="absolute inset-x-4 top-1 bottom-3 rotate-[4deg] rounded-3xl bg-accent-600/10" />
+            <div className="absolute inset-0 flex items-center justify-center rounded-2xl border border-white/80 bg-white/85 p-5 shadow-xl shadow-navy-950/10 backdrop-blur">
+              <div className="grid w-full grid-cols-[0.8fr_1.2fr] gap-3">
+                <div className="rounded-xl bg-accent-50 p-4">
+                  <BookOpen className="size-7 text-accent-700" strokeWidth={1.7} />
+                  <div className="mt-5 h-2 w-4/5 rounded-full bg-accent-200" />
+                  <div className="mt-2 h-2 w-3/5 rounded-full bg-accent-100" />
+                </div>
+                <div className="flex flex-col justify-between rounded-xl bg-gradient-to-br from-navy-950 via-accent-700 to-violet-600 p-4 text-white">
+                  <Code2 className="size-8" strokeWidth={1.6} />
+                  <div>
+                    <div className="h-2 w-4/5 rounded-full bg-white/80" />
+                    <div className="mt-2 h-2 w-3/5 rounded-full bg-white/40" />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -119,7 +140,12 @@ export function HomePage() {
             <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
               {overview.data.startHere.map((course) => (
                 <li key={course.slug}>
-                  <CourseCard course={course} />
+                  <CourseCard
+                    course={course}
+                    isStartHere
+                    isFavorite={favorites.isFavorite(course.slug)}
+                    onToggleFavorite={favorites.toggleFavorite}
+                  />
                 </li>
               ))}
             </ul>

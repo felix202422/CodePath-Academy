@@ -4,11 +4,13 @@ import { Alert } from '../../components/ui/Alert';
 import { CourseCard } from './CourseCard';
 import { ApiRequestError } from '../../lib/api';
 import { usePath } from './useCatalog';
+import { useFavoriteCourses } from './useFavoriteCourses';
 
 /** Public learning-path detail with its published courses. */
 export function PathDetailPage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const path = usePath(slug);
+  const favorites = useFavoriteCourses();
 
   if (path.isPending) {
     return (
@@ -88,7 +90,11 @@ export function PathDetailPage() {
           <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {data.courses.map((course) => (
               <li key={course.slug}>
-                <CourseCard course={course} />
+                <CourseCard
+                  course={course}
+                  isFavorite={favorites.isFavorite(course.slug)}
+                  onToggleFavorite={favorites.toggleFavorite}
+                />
               </li>
             ))}
           </ul>

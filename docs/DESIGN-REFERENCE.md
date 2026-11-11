@@ -17,8 +17,10 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 ## Region-by-region inventory
 
 1. **Header** (sticky, white): brand mark + wordmark left; primary nav (Home, Courses ▾ with
-   caret, Career Paths, About Us, Contact); wide search input with icon ("Search for
-   courses..."); right actions: outlined "Sign In" button + solid primary "Apply Now" button.
+    caret, Career Paths, About Us, Contact); wide search input with icon ("Search for
+    courses..."); right actions: outlined "Sign In" button + solid primary "Apply Now" button.
+   CodePath Academy has no maintained Contact page or contact address, so that link is omitted
+   rather than sent to a placeholder.
 2. **Courses mega-menu** (opens under the nav item): two columns —
    "Course Categories" with an icon and a per-category count for each category (two sub-columns)
    plus a "View All Courses →" link; "Popular Courses" column with thumbnail, title, and star
@@ -55,39 +57,50 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 
 | Reference element | Our implementation |
 |---|---|
-| Category list/filter with counts | Learning paths — the 7 published paths with real per-path course counts (same data the homepage shows today) |
+| Category list/filter with counts | Learning paths — the 7 published paths with real per-path course counts (same data the homepage shows today); changing category updates results immediately |
 | Level checkboxes with counts | `CourseLevel` BEGINNER / INTERMEDIATE / ADVANCED with real counts from the catalog data |
 | Type (Free / Paid / Subscription), price, Min/Max Price | **Omit** — the product has no pricing model |
 | Duration filter, duration meta | Show only once `estimated_hours` is populated (currently NULL) |
 | Instructor, enrolled count, star rating, review count | **Omit until real data exists** (enrollment counts arrive with Phase 6; ratings are not in scope). Never fake them |
+| Wishlist heart | Persist the learner's favorite course slugs in this browser and provide an explicit Favorites view; this is not popularity or enrollment data. |
 | Corner badges (BEST SELLER / POPULAR / TRENDING) | Only real signals — e.g. "Start here" from the overview's start-here set |
 | Sort: Most Popular / Top Rated | Only real sorts — Curriculum order (default), Title A–Z, Level |
-| Cover images / illustration | No course artwork exists; build typographic/gradient covers from the course title + level using tokens (no fabricated screenshots or stock photos) |
+| Cover images / illustration | Use genuine, locally bundled course-related photos under a permissive license; keep a photo credit/license record. Do not fabricate screenshots, ratings, or course metadata. |
 | Header search | Filters the public catalog client-side now; wire to a backend `?q=` when server search lands |
 | Pagination | Driven by real totals; page size 12; backend paging added when the catalog outgrows one page |
 | Popular-courses mega-menu column | Populate only after real popularity data exists; until then the mega-menu shows categories with counts only |
+| Contact navigation | Omit until the academy has a real contact destination; do not link to a placeholder. |
 
 ## Gap vs current UI (Phase 4 baseline)
 
-- [ ] Header: add the search field and the Courses mega-menu (currently plain nav + mobile
-      disclosure); decide the primary right-hand action for our shell ("Sign In" applies;
-      "Apply Now" maps to registration).
-- [ ] Hero band with an accent-colored final word on home/catalog.
-- [ ] Replace chip-only filtering with the filter sidebar (path, level) incl. counts,
-      Clear/Reset/Apply controls.
-- [ ] Results bar with counts and a sort select.
-- [ ] Course card upgrade to the reference structure (cover, chips, meta, footer) — honest
-      variant per the rules above.
-- [ ] Pagination component (real totals).
-- [ ] Palette: move `--color-navy-*` / `--color-accent-*` in `src/styles/tokens.css` to the
-      indigo/violet family; components keep consuming tokens only. Update the tokens.css header
-      comment and the palette line in `docs/DEVELOPMENT-STANDARDS.md` in the same change.
-- [ ] Update `catalogPages.test.tsx` and routing tests for the new structure; keep a11y and
-      0-console-error browser checks green.
+- [x] Header: added client-side course search, an accessible Courses mega-menu with real path
+      counts, mobile navigation, outlined "Sign In" and solid "Apply Now" (registration) actions.
+      The menu intentionally has no popularity column; there is no Contact link without a real
+      destination.
+- [x] Hero band with an accent-colored final word on home/catalog and a decorative illustration
+      made from tokens and icons (not fabricated course artwork).
+- [x] Replaced chip-only filtering with a filter sidebar for real learning paths, levels, and
+      search, including real counts and Clear All. Results update immediately on every change, so
+      the reference's Apply and Reset buttons are omitted. Pricing/type filters are omitted.
+- [x] Results bar with real result counts and honest sorts (curriculum order, title A–Z, level).
+- [x] Course cards use locally bundled, royalty-free real photographs mapped to the 20 published
+      course subjects, real path/level chips, and a "Start here" badge only for courses in the API's
+      start-here set. Image sources, photographers, and license are recorded in
+      `docs/IMAGE-ATTRIBUTIONS.md`. A heart toggles a browser-local Favorites list. Unavailable
+      duration, instructor, enrollment, rating, and price fields are not shown.
+- [x] Added visible hover/focus lift, accent ring, shadow, course-photo zoom, and button pointer/
+      hover feedback; React filter/sort/page changes replay a staggered result entrance.
+      `prefers-reduced-motion` disables the animations.
+- [x] Client-side pagination uses real filtered totals and 12 courses per page.
+- [x] Palette moved to indigo/violet theme tokens in `src/styles/tokens.css`; the token comment and
+      palette description in `docs/DEVELOPMENT-STANDARDS.md` were updated in the same change.
+- [x] Updated catalog/layout tests. Verification: `npm test` → 55/55; `npm run build` and
+      `npm run lint` pass. Live browser check: 20 published courses, 7 path categories, 12 results
+      on page 1, pagination to page 2, and the hovered card visibly lifts/highlights. No unexpected
+      console errors; signed-out sessions may log the expected 401 from `/api/v1/auth/me`.
 
 ## Execution note
 
-Recorded while completing Phase 4; **no UI code changed yet**. The next phase that touches the
-public frontend implements this document and verifies it in the browser against the reference.
-Public pages must resemble the reference closely; the student and admin shells keep their
-structure but adopt the same tokens and visual language.
+Recorded while completing Phase 4. The public catalog/header restyle was implemented and
+browser-verified on 2026-11-11. Public pages should continue to follow the reference; the student
+and admin shells keep their structure while consuming the updated shared indigo/violet tokens.

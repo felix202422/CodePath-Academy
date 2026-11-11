@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
@@ -94,8 +94,18 @@ const pathDetail: PathDetail = {
   courses: [webFoundations, frontendEngineering],
 };
 
-/** Routes the public catalog endpoints to fixtures; anonymous session otherwise. */
-function mockPublicApi() {
+/** Routes public endpoints to fixtures; anonymous session otherwise. */
+function mockPublicApi(
+  overrides: {
+    courses?: CourseSummary[];
+    paths?: PathSummary[];
+    overview?: Overview;
+  } = {},
+) {
+  const apiCourses = overrides.courses ?? courses;
+  const apiPaths = overrides.paths ?? paths;
+  const apiOverview = overrides.overview ?? overview;
+
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input) => {
     const url = String(input);
     const json = (body: unknown, status = 200) =>
@@ -111,17 +121,17 @@ function mockPublicApi() {
       return json({ status: 'UP', service: 'codepath-academy', time: '2026-11-10T00:00:00Z' });
     }
     if (url.includes('/api/v1/public/overview')) {
-      return json(overview);
+      return json(apiOverview);
     }
     if (url.includes('/api/v1/public/paths/')) {
       const slug = url.split('/').pop() ?? '';
-      const found = paths.find((path) => path.slug === slug);
+      const found = apiPaths.find((path) => path.slug === slug);
       return found
-        ? json({ ...pathDetail, ...found, courses: courses.filter((c) => c.pathSlug === slug) })
+        ? json({ ...pathDetail, ...found, courses: apiCourses.filter((c) => c.pathSlug === slug) })
         : json({ message: 'Learning path not found.' }, 404);
     }
     if (url.includes('/api/v1/public/paths')) {
-      return json(paths);
+      return json(apiPaths);
     }
     if (url.includes('/api/v1/public/courses/')) {
       const slug = url.split('/').pop() ?? '';
@@ -130,7 +140,7 @@ function mockPublicApi() {
         : json({ message: 'Course not found.' }, 404);
     }
     if (url.includes('/api/v1/public/courses')) {
-      return json(courses);
+      return json(apiCourses);
     }
     return json({ message: 'Not found' }, 404);
   });
@@ -138,6 +148,7 @@ function mockPublicApi() {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  window.localStorage.clear();
 });
 
 describe('HomePage', () => {
@@ -158,24 +169,121 @@ describe('HomePage', () => {
 });
 
 describe('CatalogPage', () => {
-  it('lists published courses and filters by learning path', async () => {
+  it('updates results immediately for text, learning-path, and level filters', async () => {
     mockPublicApi();
     const user = userEvent.setup();
 
     renderApp('/courses');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Course catalog' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Explore Our Courses' }),
+    ).toBeInTheDocument();
     expect(await screen.findByText('Computer Foundations')).toBeInTheDocument();
     expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /computer circuit board and electronic components/i }),
+    ).toHaveAttribute('src', '/images/courses/circuit-board.webp');
 
-    await user.click(screen.getByRole('button', { name: 'Frontend Development' }));
+    await user.type(screen.getByRole('searchbox', { name: 'Search' }), 'Frontend');
+    expect(screen.queryByText('Computer Foundations')).not.toBeInTheDocument();
+    expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
+
+    await user.selectOptions(screen.getByRole('combobox', { name: 'Category' }), 'frontend-development');
 
     expect(screen.queryByText('Computer Foundations')).not.toBeInTheDocument();
     expect(screen.getByText('Internet and Web Foundations')).toBeInTheDocument();
+    expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'All paths' }));
+    await user.click(screen.getByRole('checkbox', { name: /Intermediate/ }));
 
+    expect(screen.queryByText('Internet and Web Foundations')).not.toBeInTheDocument();
+    expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
+    expect(screen.getByRole('status')).toHaveTextContent('Showing 1 to 1 of 1 results');
+  });
+
+  it('searches the real catalog from the header and opens path categories', async () => {
+    mockPublicApi();
+    const user = userEvent.setup();
+
+    renderApp('/courses');
+
+    const headerSearch = await screen.findByRole('searchbox', { name: 'Search for courses' });
+    await user.type(headerSearch, 'Frontend');
+    await user.click(screen.getByRole('button', { name: 'Search courses' }));
+
+    expect(await screen.findByText('Frontend Engineering')).toBeInTheDocument();
+    expect(screen.queryByText('Computer Foundations')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /^Courses/ }));
+    expect(await screen.findByRole('heading', { name: 'Course categories' })).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: /Frontend Development/ }));
+
+    expect(await screen.findByText('Internet and Web Foundations')).toBeInTheDocument();
+    expect(screen.queryByText('Computer Foundations')).not.toBeInTheDocument();
+  });
+
+  it('saves favorites in this browser and shows them in the favorites view', async () => {
+    mockPublicApi();
+    const user = userEvent.setup();
+    window.localStorage.clear();
+
+    renderApp('/courses');
+
+    expect(await screen.findByText('Computer Foundations')).toBeInTheDocument();
+    const addFavorite = screen.getByRole('button', {
+      name: 'Add Computer Foundations to favorites',
+    });
+    await user.click(addFavorite);
+
+    const removeFavorite = await screen.findByRole('button', {
+      name: 'Remove Computer Foundations from favorites',
+    });
+    expect(removeFavorite).toHaveAttribute('aria-pressed', 'true');
+    expect(removeFavorite).toHaveClass('text-danger');
+    expect(removeFavorite.querySelector('svg')).toHaveClass('fill-current');
+    await waitFor(() => {
+      expect(JSON.parse(window.localStorage.getItem('codepath-academy:favorite-course-slugs') ?? '[]'))
+        .toEqual(['computer-foundations']);
+    });
+
+    await user.click(screen.getByRole('button', { name: 'Favorites 1' }));
+
+    expect(await screen.findByText('Showing 1 to 1 of 1 results')).toBeInTheDocument();
     expect(screen.getByText('Computer Foundations')).toBeInTheDocument();
+    expect(screen.queryByText('Programming Fundamentals')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'All courses 3' }));
+    expect(await screen.findByText('Showing 1 to 3 of 3 results')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Remove Computer Foundations from favorites' }))
+      .toHaveAttribute('aria-pressed', 'true');
+  });
+
+  it('paginates using the real filtered result total', async () => {
+    const pageCourses = Array.from({ length: 13 }, (_, index): CourseSummary => ({
+      ...foundations,
+      id: `page-${index + 1}`,
+      slug: `page-course-${String(index + 1).padStart(2, '0')}`,
+      title: `Course ${String(index + 1).padStart(2, '0')}`,
+      summary: 'A deterministic catalog fixture for pagination.',
+    }));
+    mockPublicApi({
+      courses: pageCourses,
+      paths: [{ ...softwareEngineeringPath, courseCount: pageCourses.length }],
+      overview: { ...overview, pathCount: 1, courseCount: pageCourses.length, startHere: pageCourses.slice(0, 4) },
+    });
+    const user = userEvent.setup();
+
+    renderApp('/courses');
+
+    expect(await screen.findByText('Showing 1 to 12 of 13 results')).toBeInTheDocument();
+    expect(screen.getByText('Course 12')).toBeInTheDocument();
+    expect(screen.queryByText('Course 13')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Next page' }));
+
+    expect(await screen.findByText('Showing 13 to 13 of 13 results')).toBeInTheDocument();
+    expect(screen.getByText('Course 13')).toBeInTheDocument();
+    expect(screen.queryByText('Course 12')).not.toBeInTheDocument();
   });
 });
 

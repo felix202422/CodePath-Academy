@@ -32,5 +32,10 @@ All notable changes to CodePath-Academy are documented here. Format follows
   filters, course detail pages with prerequisite chains, module/lesson counts, source
   provenance, and an honest notice while lesson content has not yet been imported, learning
   path listing and detail pages.
+- Public catalog reference restyle: indigo/violet design tokens, responsive search/menu header,
+  honest live learning-path and level filters, real result sorting/pagination, locally bundled
+  royalty-free course photographs, browser-local favorites, a registration CTA, visible
+  reduced-motion-aware hover/focus and result-transition effects;
+  unavailable popularity, ratings, duration, enrollment, and price data remain omitted.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

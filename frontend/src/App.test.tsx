@@ -85,7 +85,9 @@ describe('App routing', () => {
 
     renderApp('/courses');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Course catalog' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Explore Our Courses' }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
     // The catalog fetch fails against this mock; the page reports it honestly
