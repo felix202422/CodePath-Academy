@@ -26,7 +26,9 @@ This is a monorepo with a React/TypeScript frontend, a Java 21 / Spring Boot API
 Flyway-managed migrations, and deployment assets. The backend is a modular monolith: one application
 with domain-separated modules rather than premature microservices. See
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) and
-[`docs/CONTENT-INTEGRATION.md`](docs/CONTENT-INTEGRATION.md).
+[`docs/CONTENT-INTEGRATION.md`](docs/CONTENT-INTEGRATION.md). The visual target the frontend must
+resemble in subsequent phases is recorded in
+[`docs/DESIGN-REFERENCE.md`](docs/DESIGN-REFERENCE.md).
 
 ```text
 Browser ── HTTPS ── Nginx / Vite dev proxy

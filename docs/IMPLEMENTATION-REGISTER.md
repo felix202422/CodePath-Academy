@@ -31,6 +31,7 @@
 | CPA-004 | Implement registration, status, and bootstrap administrator flow | P0 | Done — registration/approval and env-var bootstrap implemented and covered by `BootstrapAdminRunnerTest` (5) + `AuthenticationFlowTest` (7); browser E2E verified. |
 | CPA-005 | Implement source-aware curriculum importer and review workflow | P0 | Backlog |
 | CPA-006 | Provide secure session/CSRF and authorization tests | P0 | Done — `SecurityAuthorizationTest` (6) covers 401/403 JSON, CSRF rejection, and readable XSRF cookie; live curl checks confirm headers/cookies; suite runs 20/20. |
+| CPA-007 | Restyle the frontend to the recorded visual reference | P1 | Backlog — reference recorded 2026-11-11 by user direction in `docs/DESIGN-REFERENCE.md` (layout inventory, honest adaptation rules, gap list); scoped into the next phase that touches the public frontend, including the token palette move to indigo/violet. |
 
 ## Test record
 
