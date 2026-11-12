@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { AdminLayout } from './AdminLayout';
 import { PublicLayout } from './PublicLayout';
 import { StudentLayout } from './StudentLayout';
+import { ThemeProvider } from '../../features/theme/ThemeContext';
 
 /** Session probe answers "anonymous" so the shells render their signed-out state. */
 function mockAnonymousSession() {
@@ -21,11 +22,13 @@ function mockAnonymousSession() {
 function renderShell(Shell: () => React.JSX.Element, path = '/') {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
-    <QueryClientProvider client={client}>
-      <MemoryRouter initialEntries={[path]}>
-        <Shell />
-      </MemoryRouter>
-    </QueryClientProvider>,
+      <QueryClientProvider client={client}>
+        <MemoryRouter initialEntries={[path]}>
+          <ThemeProvider>
+            <Shell />
+          </ThemeProvider>
+        </MemoryRouter>
+      </QueryClientProvider>,
   );
 }
 
@@ -45,6 +48,7 @@ describe('PublicLayout', () => {
     expect(screen.getByRole('button', { name: 'Sign In' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Apply Now' })).toBeInTheDocument();
     expect(screen.getByRole('searchbox', { name: 'Search for courses' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Switch to dark mode' })).toBeInTheDocument();
     expect(screen.getByRole('contentinfo')).toBeInTheDocument();
   });
 

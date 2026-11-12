@@ -34,9 +34,12 @@ All notable changes to CodePath-Academy are documented here. Format follows
   path listing and detail pages.
 - Public catalog reference restyle: indigo/violet design tokens, responsive search/menu header,
   honest live learning-path and level filters, real result sorting/pagination, locally bundled
-  royalty-free course photographs, browser-local favorites, a registration CTA, visible
-  reduced-motion-aware hover/focus and result-transition effects;
-  unavailable popularity, ratings, duration, enrollment, and price data remain omitted.
+  royalty-free course photographs and a real learning-team hero image, browser-local favorites,
+  a registration CTA, visible reduced-motion-aware hover/focus and result-transition effects, and
+  a persistent light/dark mode. Enrollment and rating metrics remain omitted until real records
+  exist.
+- Homepage onboarding: a factual three-step guide for first-time visitors and intersection-based
+  section reveals with a reduced-motion fallback.
 - Phase 5 course management: administrator path/course/module/lesson authoring with publication
   gates, a provenance-aware curriculum importer for local and remote sources, media/link rewriting,
   an idempotent import ledger with conflict accept/discard review, and admin content screens. All

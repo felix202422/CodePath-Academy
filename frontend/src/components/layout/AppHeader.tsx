@@ -3,6 +3,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { NavLink } from 'react-router';
 import { cn } from '../../lib/cn';
+import { ThemeToggle } from './ThemeToggle';
 
 export interface NavItem {
   to: string;
@@ -67,23 +68,24 @@ export function AppHeader({ items, actions, trailing, breakpoint = 'md' }: AppHe
         </nav>
 
         <div className={cn('items-center gap-2', visibility.nav)}>
+          <ThemeToggle />
           {trailing}
           {actions}
         </div>
 
-        <button
-          type="button"
-          className={cn(
-            'rounded-md p-2 text-ink-muted hover:bg-slate-100 hover:text-ink',
-            visibility.toggle,
-          )}
-          aria-expanded={open}
-          aria-controls={panelId}
-          aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
-          onClick={() => setOpen((value) => !value)}
-        >
-          {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
-        </button>
+        <div className={cn('ml-auto flex items-center gap-2', visibility.toggle)}>
+          <ThemeToggle />
+          <button
+            type="button"
+            className="inline-flex size-10 cursor-pointer items-center justify-center rounded-lg text-ink-muted transition-all duration-200 hover:scale-105 hover:bg-accent-50 hover:text-accent-700 active:scale-95 motion-reduce:transform-none motion-reduce:transition-none"
+            aria-expanded={open}
+            aria-controls={panelId}
+            aria-label={open ? 'Close navigation menu' : 'Open navigation menu'}
+            onClick={() => setOpen((value) => !value)}
+          >
+            {open ? <X className="size-5" aria-hidden="true" /> : <Menu className="size-5" aria-hidden="true" />}
+          </button>
+        </div>
       </div>
 
       {open && (

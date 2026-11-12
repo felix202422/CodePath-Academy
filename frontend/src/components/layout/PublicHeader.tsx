@@ -19,6 +19,7 @@ import type { FormEvent, ReactNode } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router';
 import { cn } from '../../lib/cn';
 import { usePaths } from '../../features/public/useCatalog';
+import { ThemeToggle } from './ThemeToggle';
 
 const PATH_ICONS: Record<string, LucideIcon> = {
   'software-engineering': Code2,
@@ -196,10 +197,11 @@ export function PublicHeader({ actions }: PublicHeaderProps) {
         />
 
         <div className="ml-auto hidden shrink-0 items-center gap-2 xl:flex">{actions}</div>
+        <ThemeToggle className="ml-auto xl:ml-0" />
 
         <button
           type="button"
-          className="ml-auto inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-ink-muted transition-all duration-200 hover:scale-105 hover:bg-accent-50 hover:text-accent-700 active:scale-95 xl:hidden motion-reduce:transform-none motion-reduce:transition-none"
+          className="inline-flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-lg text-ink-muted transition-all duration-200 hover:scale-105 hover:bg-accent-50 hover:text-accent-700 active:scale-95 xl:hidden motion-reduce:transform-none motion-reduce:transition-none"
           aria-expanded={mobileOpen}
           aria-controls="public-mobile-navigation"
           aria-label={mobileOpen ? 'Close navigation menu' : 'Open navigation menu'}

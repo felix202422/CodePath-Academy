@@ -61,7 +61,7 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 | Level checkboxes with counts | `CourseLevel` BEGINNER / INTERMEDIATE / ADVANCED with real counts from the catalog data |
 | Type (Free / Paid / Subscription), price, Min/Max Price | **Omit** — the product has no pricing model |
 | Duration filter, duration meta | Show only once `estimated_hours` is populated (currently NULL) |
-| Instructor, enrolled count, star rating, review count | **Omit until real data exists** (enrollment counts arrive with Phase 6; ratings are not in scope). Never fake them |
+| Instructor, enrolled count, star rating, review count | **Omit until real data exists** (enrollment counts follow Phase 6; a rating workflow must collect genuine feedback). The user chose to keep the phase sequence; never fake them. |
 | Wishlist heart | Persist the learner's favorite course slugs in this browser and provide an explicit Favorites view; this is not popularity or enrollment data. |
 | Corner badges (BEST SELLER / POPULAR / TRENDING) | Only real signals — e.g. "Start here" from the overview's start-here set |
 | Sort: Most Popular / Top Rated | Only real sorts — Curriculum order (default), Title A–Z, Level |
@@ -70,6 +70,7 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 | Pagination | Driven by real totals; page size 12; backend paging added when the catalog outgrows one page |
 | Popular-courses mega-menu column | Populate only after real popularity data exists; until then the mega-menu shows categories with counts only |
 | Contact navigation | Omit until the academy has a real contact destination; do not link to a placeholder. |
+| Theme | Persistent light/dark toggle in the public, student, and admin headers; colors remain token-driven and follow reduced-motion preferences. |
 
 ## Gap vs current UI (Phase 4 baseline)
 
@@ -77,8 +78,9 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
       counts, mobile navigation, outlined "Sign In" and solid "Apply Now" (registration) actions.
       The menu intentionally has no popularity column; there is no Contact link without a real
       destination.
-- [x] Hero band with an accent-colored final word on home/catalog and a decorative illustration
-      made from tokens and icons (not fabricated course artwork).
+- [x] Hero band with an accent-colored final word on home/catalog; the course hero uses a real,
+      locally licensed photo of learners working with code, and the home hero uses token-based
+      decorative artwork.
 - [x] Replaced chip-only filtering with a filter sidebar for real learning paths, levels, and
       search, including real counts and Clear All. Results update immediately on every change, so
       the reference's Apply and Reset buttons are omitted. Pricing/type filters are omitted.
@@ -91,16 +93,20 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 - [x] Added visible hover/focus lift, accent ring, shadow, course-photo zoom, and button pointer/
       hover feedback; React filter/sort/page changes replay a staggered result entrance.
       `prefers-reduced-motion` disables the animations.
+- [x] Home page now includes a factual three-step first-visit guide, reveals its sections as they
+      enter the viewport, and has interactive course/path cards. A persistent light/dark toggle is
+      available in the top header across the public, student, and admin shells.
 - [x] Client-side pagination uses real filtered totals and 12 courses per page.
 - [x] Palette moved to indigo/violet theme tokens in `src/styles/tokens.css`; the token comment and
       palette description in `docs/DEVELOPMENT-STANDARDS.md` were updated in the same change.
-- [x] Updated catalog/layout tests. Verification: `npm test` → 55/55; `npm run build` and
+- [x] Updated catalog/layout tests. Verification: `npm test` → 58/58; `npm run build` and
       `npm run lint` pass. Live browser check: 20 published courses, 7 path categories, 12 results
       on page 1, pagination to page 2, and the hovered card visibly lifts/highlights. No unexpected
       console errors; signed-out sessions may log the expected 401 from `/api/v1/auth/me`.
 
 ## Execution note
 
-Recorded while completing Phase 4. The public catalog/header restyle was implemented and
-browser-verified on 2026-11-11. Public pages should continue to follow the reference; the student
-and admin shells keep their structure while consuming the updated shared indigo/violet tokens.
+Recorded while completing Phase 4; the catalog/header restyle was implemented on 2026-11-11 and
+the real-photo, first-visit onboarding, scroll-reveal, and theme-toggle refinements were verified on
+2026-11-12. Public pages should continue to follow the reference; the student and admin shells keep
+their structure while consuming the updated shared indigo/violet tokens.

@@ -1,13 +1,15 @@
 # Course-card photo credits
 
-The public catalog uses eight locally bundled photographs as illustrative course covers. The
-images are genuine photographs, not AI-generated images or screenshots of CodePath Academy courses.
+The public catalog uses eight locally bundled course-cover photographs and one academy/learning
+hero photograph. The images are genuine photographs, not AI-generated images or screenshots of
+CodePath Academy courses.
 They are licensed under the [Unsplash License](https://unsplash.com/license), which allows free
 commercial and non-commercial use without requiring attribution; credits are included here as a
 courtesy. The images are not offered for download as a stock-photo collection.
 
 | Local file | Used for | Photographer | Source |
 |---|---|---|---|
+| `frontend/public/images/academy-learning.webp` | Catalog hero: learners collaborating at computers | Compagnons | [Unsplash photo](https://unsplash.com/photos/people-coding-at-monitors-in-workspace-Im_cQ6hQo10) |
 | `frontend/public/images/courses/coding-laptop.webp` | Programming, software engineering, professional development | Daniil Komov | [Unsplash photo](https://unsplash.com/photos/person-typing-on-a-laptop-with-code-displayed-43d76nNY2YU) |
 | `frontend/public/images/courses/circuit-board.webp` | Computer foundations, advanced engineering | Sven Alleblas | [Unsplash photo](https://unsplash.com/photos/a-close-up-shot-of-a-circuit-board-ma3ypTuD88Y) |
 | `frontend/public/images/courses/network-cables.webp` | Internet foundations, networking, DevOps | Taylor Vick | [Unsplash photo](https://unsplash.com/photos/cable-network-M5tzZtFCOfs) |

@@ -16,6 +16,7 @@ import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RequireRole } from './features/auth/RequireRole';
+import { ThemeProvider } from './features/theme/ThemeContext';
 
 /**
  * Route tree. Layouts establish the public/student/admin shells (Phase 2);
@@ -26,7 +27,8 @@ import { RequireRole } from './features/auth/RequireRole';
  */
 export default function App() {
   return (
-    <Routes>
+    <ThemeProvider>
+      <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
         <Route path="/courses" element={<CatalogPage />} />
@@ -133,6 +135,7 @@ export default function App() {
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
-    </Routes>
+      </Routes>
+    </ThemeProvider>
   );
 }

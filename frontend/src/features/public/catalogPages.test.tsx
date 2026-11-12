@@ -159,6 +159,8 @@ describe('HomePage', () => {
 
     expect(await screen.findByText('Start learning today')).toBeInTheDocument();
     expect(await screen.findByText('Published learning paths')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Your first three steps' })).toBeInTheDocument();
+    expect(screen.getByText('Request an account')).toBeInTheDocument();
     expect(screen.getByText('7')).toBeInTheDocument();
     expect(screen.getByText('20')).toBeInTheDocument();
     expect(screen.getByText('Computer Foundations')).toBeInTheDocument();
@@ -178,6 +180,9 @@ describe('CatalogPage', () => {
     expect(
       await screen.findByRole('heading', { level: 1, name: 'Explore Our Courses' }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole('img', { name: /learners working together at computers/i }),
+    ).toHaveAttribute('src', '/images/academy-learning.webp');
     expect(await screen.findByText('Computer Foundations')).toBeInTheDocument();
     expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
     expect(

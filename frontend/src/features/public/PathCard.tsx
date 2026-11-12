@@ -6,9 +6,9 @@ import type { PathSummary } from './catalogApi';
 export function PathCard({ path }: { path: PathSummary }) {
   return (
     <Link to={`/paths/${path.slug}`} className="block h-full">
-      <Card className="flex h-full flex-col transition-shadow hover:shadow-md">
+      <Card className="group flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:border-accent-300 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
         <span
-          className="block h-1.5 w-12 rounded-full"
+          className="block h-1.5 w-12 rounded-full transition-all duration-300 group-hover:w-20"
           style={{ backgroundColor: path.accentColor ?? '#2563eb' }}
           aria-hidden="true"
         />

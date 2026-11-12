@@ -36,6 +36,10 @@ html {
   background: var(--color-canvas);
 }
 
+:root {
+  color-scheme: light;
+}
+
 @keyframes catalog-results-enter {
   from {
     opacity: 0;
@@ -60,6 +64,18 @@ html {
   }
 }
 
+@keyframes scroll-reveal-item {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 0.875rem, 0) scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
 .catalog-results-enter > li {
   animation: catalog-results-enter 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
@@ -68,14 +84,161 @@ html {
   animation: catalog-menu-enter 180ms ease-out both;
 }
 
+.scroll-reveal-visible .scroll-reveal-item {
+  animation: scroll-reveal-item 480ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-reveal {
+    opacity: 0;
+    transform: translate3d(0, 1.5rem, 0);
+    transition:
+      opacity 600ms ease-out,
+      transform 600ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  .scroll-reveal-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .catalog-results-enter > li,
-  .catalog-menu-enter {
+  .catalog-menu-enter,
+  .scroll-reveal-visible .scroll-reveal-item {
     animation: none;
+  }
+
+  .scroll-reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
   }
 }
 
 :focus-visible {
   outline: 2px solid var(--color-accent-500);
   outline-offset: 2px;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --color-canvas: #101525;
+  --color-surface: #181f31;
+  --color-ink: #e7eaf4;
+  --color-ink-muted: #a5afc3;
+  --color-accent-50: #202541;
+  --color-accent-100: #2b3157;
+  --color-accent-200: #414a78;
+  --color-accent-400: #9aaaf8;
+  --color-accent-500: #a5b4fc;
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+}
+
+:root[data-theme='dark'] .text-navy-950,
+:root[data-theme='dark'] .text-navy-900 {
+  color: #eef0ff;
+}
+
+:root[data-theme='dark'] .text-accent-500,
+:root[data-theme='dark'] .text-accent-600 {
+  color: #a5b4fc;
+}
+
+:root[data-theme='dark'] .text-accent-700,
+:root[data-theme='dark'] .hover\:text-accent-700:hover,
+:root[data-theme='dark'] .group:hover .group-hover\:text-accent-700 {
+  color: #c7d2fe;
+}
+
+:root[data-theme='dark'] .bg-white {
+  background-color: var(--color-surface);
+}
+
+:root[data-theme='dark'] [class~='bg-white/85'] {
+  background-color: rgb(24 31 49 / 90%);
+}
+
+:root[data-theme='dark'] .bg-slate-50 {
+  background-color: #20263a;
+}
+
+:root[data-theme='dark'] .bg-slate-100 {
+  background-color: #293247;
+}
+
+:root[data-theme='dark'] .text-slate-700,
+:root[data-theme='dark'] .text-slate-600 {
+  color: #d5dbea;
+}
+
+:root[data-theme='dark'] .text-slate-500,
+:root[data-theme='dark'] .text-slate-400 {
+  color: #a6b0c4;
+}
+
+:root[data-theme='dark'] .border-slate-100,
+:root[data-theme='dark'] .border-slate-200,
+:root[data-theme='dark'] .divide-slate-200 > :not(:last-child) {
+  border-color: #30384d;
+}
+
+:root[data-theme='dark'] .border-slate-300 {
+  border-color: #46516b;
+}
+
+:root[data-theme='dark'] input::placeholder {
+  color: #9aa5bb;
+}
+
+:root[data-theme='dark'] .bg-green-50 {
+  background-color: #102c28;
+}
+
+:root[data-theme='dark'] .bg-green-100 {
+  background-color: #153d34;
+}
+
+:root[data-theme='dark'] .border-green-200 {
+  border-color: #1c5a4b;
+}
+
+:root[data-theme='dark'] .text-green-900,
+:root[data-theme='dark'] .text-green-800 {
+  color: #a7f3d0;
+}
+
+:root[data-theme='dark'] .bg-amber-100 {
+  background-color: #493812;
+}
+
+:root[data-theme='dark'] .text-amber-800 {
+  color: #fde68a;
+}
+
+:root[data-theme='dark'] .bg-red-50 {
+  background-color: #351d29;
+}
+
+:root[data-theme='dark'] .bg-red-100 {
+  background-color: #4b2028;
+}
+
+:root[data-theme='dark'] .border-red-200 {
+  border-color: #743746;
+}
+
+:root[data-theme='dark'] .text-red-700,
+:root[data-theme='dark'] .text-red-800 {
+  color: #fca5a5;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root,
+  :root * {
+    scroll-behavior: auto !important;
+  }
 }

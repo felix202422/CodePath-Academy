@@ -41,7 +41,8 @@ consistent and reviewable as it grows.
   `docs/DESIGN-REFERENCE.md` (adopted 2026-11-11 by user direction): pages built or restyled
   from that date must resemble the recorded reference. The brand palette is indigo `#4f46e5`
   with violet `#7c3aed` accents, a pale indigo canvas, and deep indigo text tokens; this replaces
-  the original brief palette in `tokens.css` in the same change as the restyle.
+  the original brief palette in `tokens.css` in the same change as the restyle. The shared
+  light/dark toggle persists in browser storage; animation must respect `prefers-reduced-motion`.
 - Accessible by default: semantic HTML, labeled controls, visible focus, keyboard support, and
   contrast checked against the token palette.
 - Tests with Vitest + Testing Library for components and user workflows.

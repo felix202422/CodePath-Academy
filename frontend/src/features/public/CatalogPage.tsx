@@ -1,8 +1,6 @@
 import {
   ArrowLeft,
   ArrowRight,
-  BookOpen,
-  Code2,
   Heart,
   Search,
 } from 'lucide-react';
@@ -194,28 +192,21 @@ export function CatalogPage() {
             </p>
           </div>
 
-          <div aria-hidden="true" className="relative mx-auto hidden h-48 w-full max-w-sm md:block">
-            <div className="absolute inset-x-8 top-3 bottom-1 rotate-[-5deg] rounded-3xl bg-violet-600/10" />
-            <div className="absolute inset-x-4 top-1 bottom-3 rotate-[4deg] rounded-3xl bg-accent-600/10" />
-            <div className="absolute inset-0 flex items-center justify-center rounded-2xl border border-white/80 bg-white/85 p-5 shadow-xl shadow-navy-950/10 backdrop-blur">
-              <div className="grid w-full grid-cols-[0.8fr_1.2fr] gap-3">
-                <div className="rounded-xl bg-accent-50 p-4">
-                  <BookOpen className="size-7 text-accent-700" strokeWidth={1.7} />
-                  <div className="mt-5 h-2 w-4/5 rounded-full bg-accent-200" />
-                  <div className="mt-2 h-2 w-3/5 rounded-full bg-accent-100" />
-                </div>
-                <div className="flex flex-col justify-between rounded-xl bg-gradient-to-br from-navy-950 via-accent-700 to-violet-600 p-4 text-white">
-                  <Code2 className="size-8" strokeWidth={1.6} />
-                  <div>
-                    <div className="h-2 w-4/5 rounded-full bg-white/80" />
-                    <div className="mt-2 h-2 w-3/5 rounded-full bg-white/40" />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <span className="absolute -right-1 bottom-0 flex size-12 items-center justify-center rounded-2xl bg-white text-accent-700 shadow-lg shadow-accent-900/10">
-              <BookOpen className="size-6" />
-            </span>
+          <div className="group relative mx-auto hidden h-52 w-full max-w-sm overflow-hidden rounded-2xl border border-white/70 bg-navy-950 shadow-xl shadow-navy-950/15 md:block">
+            <img
+              src="/images/academy-learning.webp"
+              alt="Illustrative stock photo of learners working together at computers with code on screen."
+              loading="eager"
+              decoding="async"
+              className="absolute inset-0 size-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105 motion-reduce:transform-none motion-reduce:transition-none"
+            />
+            <div
+              aria-hidden="true"
+              className="absolute inset-0 bg-gradient-to-t from-navy-950/80 via-navy-950/10 to-transparent"
+            />
+            <p className="absolute bottom-4 left-4 rounded-lg border border-white/30 bg-navy-950/50 px-3 py-2 text-xs font-semibold text-white backdrop-blur-sm">
+              Learn. Build. Innovate.
+            </p>
           </div>
         </div>
       </section>

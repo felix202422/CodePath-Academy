@@ -1,10 +1,19 @@
-import { BookOpen, Code2, FolderKanban, Route, ShieldCheck } from 'lucide-react';
+import {
+  ArrowRight,
+  BookOpen,
+  Code2,
+  Compass,
+  Search,
+  Route,
+  UserCheck,
+} from 'lucide-react';
 import { Link } from 'react-router';
 import { ApiStatus } from '../health/ApiStatus';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
 import { SpinnerCentered } from '../../components/ui/Spinner';
+import { ScrollReveal } from '../../components/ui/ScrollReveal';
 import { ApiRequestError } from '../../lib/api';
 import { CourseCard } from './CourseCard';
 import { PathCard } from './PathCard';
@@ -14,27 +23,54 @@ import { useFavoriteCourses } from './useFavoriteCourses';
 const FEATURES = [
   {
     icon: Route,
-    title: 'Structured learning paths',
+    title: 'Published learning paths',
     description:
-      'Follow curated paths across software engineering, cybersecurity, and networking — from fundamentals to real-world projects.',
+      'Browse the learning paths currently available and see their real published course counts.',
   },
   {
     icon: BookOpen,
-    title: 'Lessons that build',
+    title: 'Course details before you start',
     description:
-      'Every course is organized into modules and lessons with practical exercises, so you learn by doing instead of watching.',
+      'Review each published course’s level, summary, prerequisites, and curriculum source before choosing.',
   },
   {
-    icon: FolderKanban,
-    title: 'Real-world projects',
+    icon: Compass,
+    title: 'A clear starting point',
     description:
-      'Apply what you learn to portfolio-ready projects that demonstrate skills to employers.',
+      'Use the real “Start here” recommendations or browse courses in curriculum order.',
   },
   {
-    icon: ShieldCheck,
-    title: 'Assessments you can trust',
+    icon: UserCheck,
+    title: 'Approved access',
     description:
-      'Quizzes and assignments are graded on the server, with honest feedback and persistent progress tracking.',
+      'Create an account; an administrator reviews registration before learning access is activated.',
+  },
+];
+
+const START_STEPS = [
+  {
+    number: '01',
+    icon: Search,
+    title: 'Explore courses',
+    description: 'Filter published courses by learning path and level to find a useful first step.',
+    to: '/courses',
+    action: 'Browse courses',
+  },
+  {
+    number: '02',
+    icon: Route,
+    title: 'Choose a learning path',
+    description: 'Compare the paths and follow the course sequence that fits your goals.',
+    to: '/paths',
+    action: 'Compare paths',
+  },
+  {
+    number: '03',
+    icon: UserCheck,
+    title: 'Request an account',
+    description: 'Register with your details; an administrator reviews each request before access.',
+    to: '/register',
+    action: 'Apply Now',
   },
 ];
 
@@ -58,9 +94,8 @@ export function HomePage() {
               Learn. Build. Innovate. <span className="text-accent-600">Become.</span>
             </h1>
             <p className="mt-5 max-w-2xl text-lg leading-7 text-ink-muted">
-              Structured technology courses, practical exercises, assessments, and real-world
-              projects — organized into learning paths that take you from fundamentals to
-              job-ready skills.
+              Explore the courses currently published, compare learning paths, and review
+              prerequisites before choosing a clear place to begin.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link to="/courses">
@@ -97,6 +132,7 @@ export function HomePage() {
         </div>
       </section>
 
+      <ScrollReveal>
       <section aria-labelledby="catalog-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -138,8 +174,12 @@ export function HomePage() {
               First courses in curriculum order
             </h3>
             <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-              {overview.data.startHere.map((course) => (
-                <li key={course.slug}>
+              {overview.data.startHere.map((course, index) => (
+                <li
+                  key={course.slug}
+                  className="scroll-reveal-item h-full"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                >
                   <CourseCard
                     course={course}
                     isStartHere
@@ -160,8 +200,12 @@ export function HomePage() {
               </Link>
             </div>
             <ul className="mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {overview.data.paths.map((path) => (
-                <li key={path.slug}>
+              {overview.data.paths.map((path, index) => (
+                <li
+                  key={path.slug}
+                  className="scroll-reveal-item h-full"
+                  style={{ animationDelay: `${index * 60}ms` }}
+                >
                   <PathCard path={path} />
                 </li>
               ))}
@@ -169,22 +213,78 @@ export function HomePage() {
           </>
         )}
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
+      <section aria-labelledby="getting-started-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
+        <div className="max-w-3xl">
+          <p className="text-xs font-bold tracking-[0.14em] text-accent-700 uppercase">
+            New to CodePath Academy?
+          </p>
+          <h2 id="getting-started-heading" className="mt-2 text-2xl font-bold text-navy-950 sm:text-3xl">
+            Your first three steps
+          </h2>
+          <p className="mt-2 text-sm leading-6 text-ink-muted">
+            Start by exploring what is published, choose a path, then request an account for access.
+          </p>
+        </div>
+        <ol className="mt-6 grid gap-5 md:grid-cols-3">
+          {START_STEPS.map((step, index) => (
+            <li
+              key={step.number}
+              className="scroll-reveal-item h-full"
+              style={{ animationDelay: `${index * 90}ms` }}
+            >
+              <Card className="group flex h-full flex-col transition-all duration-300 hover:-translate-y-1 hover:border-accent-300 hover:shadow-xl motion-reduce:transform-none motion-reduce:transition-none">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold tracking-[0.14em] text-accent-700">
+                    STEP {step.number}
+                  </span>
+                  <step.icon
+                    className="size-5 text-accent-600 transition-transform duration-200 group-hover:scale-110 group-hover:-rotate-6 motion-reduce:transform-none motion-reduce:transition-none"
+                    aria-hidden="true"
+                  />
+                </div>
+                <CardTitle className="mt-4">{step.title}</CardTitle>
+                <CardDescription className="mt-2 flex-1">{step.description}</CardDescription>
+                <Link
+                  to={step.to}
+                  className="group/step mt-5 inline-flex w-fit cursor-pointer items-center gap-2 rounded-lg bg-accent-50 px-3 py-2 text-sm font-semibold text-accent-700 ring-1 ring-inset ring-accent-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-600 hover:text-white hover:shadow-md motion-reduce:transform-none motion-reduce:transition-none"
+                >
+                  {step.action}
+                  <ArrowRight className="size-4 transition-transform duration-200 group-hover/step:translate-x-1 motion-reduce:transform-none motion-reduce:transition-none" aria-hidden="true" />
+                </Link>
+              </Card>
+            </li>
+          ))}
+        </ol>
+      </section>
+      </ScrollReveal>
+
+      <ScrollReveal>
       <section aria-labelledby="features-heading" className="mx-auto max-w-6xl px-4 py-14 sm:px-6">
         <h2 id="features-heading" className="text-2xl font-bold text-navy-950">
           What the academy offers
         </h2>
         <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-          {FEATURES.map((feature) => (
-            <Card key={feature.title}>
-              <feature.icon className="size-6 text-accent-600" aria-hidden="true" />
-              <CardTitle className="mt-3">{feature.title}</CardTitle>
-              <CardDescription>{feature.description}</CardDescription>
-            </Card>
+          {FEATURES.map((feature, index) => (
+            <div
+              key={feature.title}
+              className="scroll-reveal-item h-full"
+              style={{ animationDelay: `${index * 60}ms` }}
+            >
+              <Card className="h-full transition-all duration-300 hover:-translate-y-1 hover:border-accent-300 hover:shadow-lg motion-reduce:transform-none motion-reduce:transition-none">
+                <feature.icon className="size-6 text-accent-600" aria-hidden="true" />
+                <CardTitle className="mt-3">{feature.title}</CardTitle>
+                <CardDescription>{feature.description}</CardDescription>
+              </Card>
+            </div>
           ))}
         </div>
       </section>
+      </ScrollReveal>
 
+      <ScrollReveal>
       <section aria-labelledby="status-heading" className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
         <h2 id="status-heading" className="text-2xl font-bold text-navy-950">
           Platform status
@@ -197,6 +297,7 @@ export function HomePage() {
           <ApiStatus />
         </Card>
       </section>
+      </ScrollReveal>
     </div>
   );
 }
