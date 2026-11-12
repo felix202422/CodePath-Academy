@@ -18,6 +18,7 @@ public record CourseDetailResponse(
         String pathSlug,
         String pathName,
         String sourceRepository,
+        long enrollmentCount,
         long moduleCount,
         long lessonCount,
         List<CourseSummaryResponse> prerequisites) {

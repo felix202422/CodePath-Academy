@@ -25,6 +25,7 @@ const foundations: CourseSummary = {
   level: 'BEGINNER',
   pathSlug: 'software-engineering',
   pathName: 'Software Engineering',
+  enrollmentCount: 0,
 };
 
 const webFoundations: CourseSummary = {
@@ -35,6 +36,7 @@ const webFoundations: CourseSummary = {
   level: 'BEGINNER',
   pathSlug: 'frontend-development',
   pathName: 'Frontend Development',
+  enrollmentCount: 0,
 };
 
 const frontendEngineering: CourseSummary = {
@@ -45,6 +47,7 @@ const frontendEngineering: CourseSummary = {
   level: 'INTERMEDIATE',
   pathSlug: 'frontend-development',
   pathName: 'Frontend Development',
+  enrollmentCount: 0,
 };
 
 const courses: CourseSummary[] = [foundations, webFoundations, frontendEngineering];

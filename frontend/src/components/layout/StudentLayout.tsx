@@ -6,14 +6,15 @@ import { useLogout } from '../../features/auth/useSession';
 
 const STUDENT_NAV: NavItem[] = [
   { to: '/student', label: 'Dashboard', end: true },
+  { to: '/student/enrollments', label: 'Enrollments' },
   { to: '/student/learning', label: 'My learning' },
   { to: '/student/assessments', label: 'Assessments' },
   { to: '/student/profile', label: 'Profile' },
 ];
 
 /**
- * Shell for enrolled students. Route protection is added with authentication in
- * Phase 3; until then this shell only establishes the navigation structure.
+ * Shell for signed-in students. Route protection is enforced by RequireRole and
+ * every student API resolves ownership from the server-side session.
  */
 export function StudentLayout() {
   const logout = useLogout();

@@ -8,6 +8,7 @@ import { useLogout } from '../../features/auth/useSession';
 const ADMIN_NAV: NavItem[] = [
   { to: '/admin', label: 'Dashboard', end: true },
   { to: '/admin/students', label: 'Students' },
+  { to: '/admin/enrollments', label: 'Enrollments' },
   { to: '/admin/courses', label: 'Courses' },
   { to: '/admin/content', label: 'Content' },
   { to: '/admin/announcements', label: 'Announcements' },

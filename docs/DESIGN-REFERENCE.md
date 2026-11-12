@@ -61,7 +61,7 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 | Level checkboxes with counts | `CourseLevel` BEGINNER / INTERMEDIATE / ADVANCED with real counts from the catalog data |
 | Type (Free / Paid / Subscription), price, Min/Max Price | **Omit** — the product has no pricing model |
 | Duration filter, duration meta | Show only once `estimated_hours` is populated (currently NULL) |
-| Instructor, enrolled count, star rating, review count | **Omit until real data exists** (enrollment counts follow Phase 6; a rating workflow must collect genuine feedback). The user chose to keep the phase sequence; never fake them. |
+| Instructor, enrolled count, star rating, review count | Show the real approved-enrollment count from the Phase 6 ledger. Omit instructor/review metrics until those workflows collect genuine records; never fake them. |
 | Wishlist heart | Persist the learner's favorite course slugs in this browser and provide an explicit Favorites view; this is not popularity or enrollment data. |
 | Corner badges (BEST SELLER / POPULAR / TRENDING) | Only real signals — e.g. "Start here" from the overview's start-here set |
 | Sort: Most Popular / Top Rated | Only real sorts — Curriculum order (default), Title A–Z, Level |
@@ -88,8 +88,9 @@ CodePath Academy's own (real) content. The reference fixes the *design*; our dat
 - [x] Course cards use locally bundled, royalty-free real photographs mapped to the 20 published
       course subjects, real path/level chips, and a "Start here" badge only for courses in the API's
       start-here set. Image sources, photographers, and license are recorded in
-      `docs/IMAGE-ATTRIBUTIONS.md`. A heart toggles a browser-local Favorites list. Unavailable
-      duration, instructor, enrollment, rating, and price fields are not shown.
+      `docs/IMAGE-ATTRIBUTIONS.md`. A heart toggles a browser-local Favorites list. Approved
+      enrollment totals are real; unavailable duration, instructor, rating, and price fields are not
+      shown.
 - [x] Added visible hover/focus lift, accent ring, shadow, course-photo zoom, and button pointer/
       hover feedback; React filter/sort/page changes replay a staggered result entrance.
       `prefers-reduced-motion` disables the animations.

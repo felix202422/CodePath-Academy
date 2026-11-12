@@ -11,6 +11,8 @@ import com.codepath.academy.catalog.model.LearningPath;
 import com.codepath.academy.catalog.repository.CourseRepository;
 import com.codepath.academy.catalog.repository.LearningPathRepository;
 import com.codepath.academy.common.error.ApiException;
+import com.codepath.academy.enrollment.model.EnrollmentStatus;
+import com.codepath.academy.enrollment.repository.CourseEnrollmentRepository;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -33,17 +35,21 @@ public class PublicCatalogService {
 
     private final LearningPathRepository pathRepository;
     private final CourseRepository courseRepository;
+    private final CourseEnrollmentRepository enrollmentRepository;
 
     public PublicCatalogService(LearningPathRepository pathRepository,
-                                CourseRepository courseRepository) {
+                                CourseRepository courseRepository,
+                                CourseEnrollmentRepository enrollmentRepository) {
         this.pathRepository = pathRepository;
         this.courseRepository = courseRepository;
+        this.enrollmentRepository = enrollmentRepository;
     }
 
     @Transactional(readOnly = true)
     public OverviewResponse getOverview() {
         Map<UUID, LearningPath> publishedPaths = publishedPathIndex();
         Map<UUID, Long> counts = courseCountsByPath();
+        Map<UUID, Long> enrollmentCounts = approvedEnrollmentCounts();
 
         List<PathSummaryResponse> paths = publishedPaths.values().stream()
                 .sorted(Comparator.comparingInt(LearningPath::getDisplayOrder))
@@ -53,7 +59,7 @@ public class PublicCatalogService {
         List<CourseSummaryResponse> startHere =
                 courseRepository.findTop4ByStatusOrderByDisplayOrderAsc(ContentStatus.PUBLISHED)
                         .stream()
-                        .map(course -> toCourseSummary(course, publishedPaths))
+                        .map(course -> toCourseSummary(course, publishedPaths, enrollmentCounts))
                         .filter(Objects::nonNull)
                         .toList();
 
@@ -73,11 +79,13 @@ public class PublicCatalogService {
     public PathDetailResponse getPath(String slug) {
         LearningPath path = pathRepository.findBySlugAndStatus(slug, ContentStatus.PUBLISHED)
                 .orElseThrow(() -> ApiException.notFound("Learning path not found."));
+        Map<UUID, Long> enrollmentCounts = approvedEnrollmentCounts();
         List<CourseSummaryResponse> courses =
                 courseRepository.findByLearningPathIdAndStatusOrderByDisplayOrderAsc(
                                 path.getId(), ContentStatus.PUBLISHED)
                         .stream()
-                        .map(course -> toCourseSummary(course, Map.of(path.getId(), path)))
+                        .map(course -> toCourseSummary(
+                                course, Map.of(path.getId(), path), enrollmentCounts))
                         .filter(Objects::nonNull)
                         .toList();
         return new PathDetailResponse(
@@ -88,8 +96,9 @@ public class PublicCatalogService {
     @Transactional(readOnly = true)
     public List<CourseSummaryResponse> listCourses() {
         Map<UUID, LearningPath> publishedPaths = publishedPathIndex();
+        Map<UUID, Long> enrollmentCounts = approvedEnrollmentCounts();
         return courseRepository.findByStatusOrderByDisplayOrderAsc(ContentStatus.PUBLISHED).stream()
-                .map(course -> toCourseSummary(course, publishedPaths))
+                .map(course -> toCourseSummary(course, publishedPaths, enrollmentCounts))
                 .filter(Objects::nonNull)
                 .toList();
     }
@@ -104,10 +113,11 @@ public class PublicCatalogService {
                 .orElseThrow(() -> ApiException.notFound("Course not found."));
 
         Map<UUID, LearningPath> publishedPaths = publishedPathIndex();
+        Map<UUID, Long> enrollmentCounts = approvedEnrollmentCounts();
         List<CourseSummaryResponse> prerequisites =
                 courseRepository.findPrerequisites(course.getId(), ContentStatus.PUBLISHED.name())
                         .stream()
-                        .map(prereq -> toCourseSummary(prereq, publishedPaths))
+                        .map(prereq -> toCourseSummary(prereq, publishedPaths, enrollmentCounts))
                         .filter(Objects::nonNull)
                         .toList();
 
@@ -115,6 +125,7 @@ public class PublicCatalogService {
                 course.getId(), course.getSlug(), course.getTitle(), course.getSummary(),
                 course.getDescription(), course.getLevel(), path.getSlug(), path.getName(),
                 course.getSourceRepository(),
+                enrollmentCounts.getOrDefault(course.getId(), 0L),
                 courseRepository.countPublishedModules(course.getId()),
                 courseRepository.countPublishedLessons(course.getId()),
                 prerequisites);
@@ -132,6 +143,14 @@ public class PublicCatalogService {
                         CourseRepository.PathCourseCount::getTotal));
     }
 
+    private Map<UUID, Long> approvedEnrollmentCounts() {
+        return enrollmentRepository
+                .aggregateEnrollmentCountsByStatus(EnrollmentStatus.APPROVED).stream()
+                .collect(Collectors.toMap(
+                        CourseEnrollmentRepository.EnrollmentCount::getCourseId,
+                        CourseEnrollmentRepository.EnrollmentCount::getEnrollmentCount));
+    }
+
     private PathSummaryResponse toPathSummary(LearningPath path, Map<UUID, Long> counts) {
         int courseCount = counts.getOrDefault(path.getId(), 0L).intValue();
         return new PathSummaryResponse(
@@ -140,13 +159,15 @@ public class PublicCatalogService {
     }
 
     /** Null when the course's owning path is not published — such rows stay hidden. */
-    private CourseSummaryResponse toCourseSummary(Course course, Map<UUID, LearningPath> paths) {
+    private CourseSummaryResponse toCourseSummary(Course course, Map<UUID, LearningPath> paths,
+                                                   Map<UUID, Long> enrollmentCounts) {
         LearningPath path = paths.get(course.getLearningPathId());
         if (path == null) {
             return null;
         }
         return new CourseSummaryResponse(
                 course.getId(), course.getSlug(), course.getTitle(), course.getSummary(),
-                course.getLevel(), path.getSlug(), path.getName());
+                course.getLevel(), path.getSlug(), path.getName(),
+                enrollmentCounts.getOrDefault(course.getId(), 0L));
     }
 }

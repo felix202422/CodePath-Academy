@@ -11,6 +11,8 @@ export interface CourseSummary {
   level: CourseLevel;
   pathSlug: string;
   pathName: string;
+  /** Approved enrollment count computed from real course_enrollment rows. */
+  enrollmentCount: number;
 }
 
 export interface CourseDetail extends CourseSummary {

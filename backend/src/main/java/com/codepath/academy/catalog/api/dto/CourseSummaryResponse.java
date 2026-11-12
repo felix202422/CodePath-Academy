@@ -11,5 +11,6 @@ public record CourseSummaryResponse(
         String summary,
         CourseLevel level,
         String pathSlug,
-        String pathName) {
+        String pathName,
+        long enrollmentCount) {
 }

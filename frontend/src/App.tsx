@@ -13,6 +13,8 @@ import { PlaceholderPage } from './features/shared/PlaceholderPage';
 import { AdminContentPage } from './features/admin/AdminContentPage';
 import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
 import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
+import { AdminEnrollmentsPage } from './features/admin/AdminEnrollmentsPage';
+import { MyEnrollmentsPage } from './features/student/MyEnrollmentsPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RequireRole } from './features/auth/RequireRole';
@@ -63,6 +65,7 @@ export default function App() {
               />
             }
           />
+          <Route path="enrollments" element={<MyEnrollmentsPage />} />
           <Route
             path="assessments"
             element={
@@ -79,7 +82,7 @@ export default function App() {
               <PlaceholderPage
                 title="Profile"
                 phase="Phase 3 — Authentication and security"
-                description="Account details, password changes, and enrollment history."
+                description="Account details and password changes. Enrollment requests are listed separately in My enrollments."
               />
             }
           />
@@ -109,6 +112,7 @@ export default function App() {
               />
             }
           />
+          <Route path="enrollments" element={<AdminEnrollmentsPage />} />
           <Route path="courses" element={<AdminCoursesPage />} />
           <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
           <Route path="content" element={<AdminContentPage />} />

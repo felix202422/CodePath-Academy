@@ -36,13 +36,17 @@ All notable changes to CodePath-Academy are documented here. Format follows
   honest live learning-path and level filters, real result sorting/pagination, locally bundled
   royalty-free course photographs and a real learning-team hero image, browser-local favorites,
   a registration CTA, visible reduced-motion-aware hover/focus and result-transition effects, and
-  a persistent light/dark mode. Enrollment and rating metrics remain omitted until real records
-  exist.
+  a persistent light/dark mode. Public course cards and details show only approved enrollment
+  counts from the real enrollment ledger; ratings remain omitted until a genuine feedback workflow
+  exists.
 - Homepage onboarding: a factual three-step guide for first-time visitors and intersection-based
   section reveals with a reduced-motion fallback.
 - Phase 5 course management: administrator path/course/module/lesson authoring with publication
   gates, a provenance-aware curriculum importer for local and remote sources, media/link rewriting,
   an idempotent import ledger with conflict accept/discard review, and admin content screens. All
   imported material remains draft until an administrator publishes it.
+- Phase 6 enrollment: active students can request access to published courses; administrators
+  review requests with an optional note, and students see their own request history. Only approved
+  enrollment rows contribute to public course counts.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

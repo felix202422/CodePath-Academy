@@ -55,6 +55,11 @@ status and role on the server. Student course access additionally checks an appr
 the requested course. Assessment answers and other students' private records are never exposed by
 client-side filtering.
 
+The Phase 6 enrollment API derives the student identity from the authenticated session, accepts
+requests only for published courses, and scopes history to that student. Administrators may decide
+each pending request once; the review row is locked during the decision and records reviewer,
+timestamp, and optional note. Public catalog enrollment totals aggregate approved rows only.
+
 ## Content import and rendering
 
 The importer accepts only the configured CodePath-Masterclass repository or an administrator-selected

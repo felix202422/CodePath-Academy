@@ -1,4 +1,4 @@
-import { ArrowRight, Heart } from 'lucide-react';
+import { ArrowRight, Heart, Users } from 'lucide-react';
 import { Link } from 'react-router';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
@@ -171,7 +171,10 @@ export function CourseCard({
           {course.summary}
         </CardDescription>
         <div className="mt-5 flex items-center justify-between gap-2 border-t border-slate-100 pt-3">
-          <span className="text-xs font-medium text-ink-muted">Published course</span>
+          <span className="inline-flex items-center gap-1.5 text-xs font-medium text-ink-muted">
+            <Users className="size-3.5" aria-hidden="true" />
+            {course.enrollmentCount} {course.enrollmentCount === 1 ? 'learner' : 'learners'} enrolled
+          </span>
           <Link
             to={`/courses/${course.slug}`}
             className="group/view inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-lg bg-accent-50 px-3 py-2 text-sm font-semibold text-accent-700 ring-1 ring-inset ring-accent-200 transition-all duration-200 hover:-translate-y-0.5 hover:bg-accent-600 hover:text-white hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-500 motion-reduce:transform-none motion-reduce:transition-none"

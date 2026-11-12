@@ -86,6 +86,8 @@ public class SecurityConfig {
                                 "/api/v1/openapi.json",
                                 "/api/v1/swagger.html")
                         .permitAll()
+                        .requestMatchers("/api/v1/me/enrollments", "/api/v1/me/enrollments/**")
+                        .hasRole("STUDENT")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll())

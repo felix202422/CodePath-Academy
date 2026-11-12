@@ -2,8 +2,11 @@ import { ArrowLeft, BookOpen, GraduationCap } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Alert } from '../../components/ui/Alert';
+import { Button } from '../../components/ui/Button';
 import { Card, CardTitle } from '../../components/ui/Card';
 import { ApiRequestError } from '../../lib/api';
+import { useSession } from '../auth/useSession';
+import { useMyCourseEnrollment, useRequestEnrollment } from '../enrollment/useEnrollments';
 import { useCourse } from './useCatalog';
 import type { CourseLevel } from './catalogApi';
 
@@ -23,6 +26,11 @@ const LEVEL_TONE: Record<CourseLevel, BadgeTone> = {
 export function CourseDetailPage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const course = useCourse(slug);
+  const session = useSession();
+  const isActiveStudent =
+    session.data?.role === 'STUDENT' && session.data.status === 'ACTIVE';
+  const enrollment = useMyCourseEnrollment(course.data?.id ?? '', isActiveStudent);
+  const request = useRequestEnrollment();
 
   if (course.isPending) {
     return (
@@ -110,6 +118,81 @@ export function CourseDetailPage() {
             {data.lessonCount} {data.lessonCount === 1 ? 'lesson' : 'lessons'}
           </span>
         </div>
+      </section>
+
+      <section aria-labelledby="enrollment-heading" className="mt-8 rounded-xl border border-slate-200 bg-surface p-5">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 id="enrollment-heading" className="text-xl font-bold text-navy-950">
+              Course enrollment
+            </h2>
+            <p className="mt-2 text-sm text-ink-muted">
+              {data.enrollmentCount} {data.enrollmentCount === 1 ? 'learner is' : 'learners are'} currently enrolled.
+            </p>
+          </div>
+
+          {isActiveStudent ? (
+            enrollment.isPending ? (
+              <p className="text-sm text-ink-muted" role="status">Checking your enrollment…</p>
+            ) : enrollment.isError ? (
+              <Alert tone="danger">{enrollment.error.message}</Alert>
+            ) : enrollment.data?.status === 'APPROVED' ? (
+              <div className="flex flex-col items-start gap-2">
+                <Badge tone="success">Enrolled</Badge>
+                <Link to="/student/enrollments" className="text-sm font-semibold text-accent-700 hover:underline">
+                  View enrollment history
+                </Link>
+              </div>
+            ) : enrollment.data?.status === 'PENDING' ? (
+              <Badge tone="warning">Request pending review</Badge>
+            ) : enrollment.data?.status === 'REJECTED' ? (
+              <div className="max-w-sm text-sm text-ink-muted">
+                <Badge tone="danger">Request declined</Badge>
+                <p className="mt-2">
+                  This request has already been reviewed. Contact an administrator if you need help.
+                </p>
+                {enrollment.data.reviewNotes && <p className="mt-2">{enrollment.data.reviewNotes}</p>}
+              </div>
+            ) : (
+              <Button
+                loading={request.isPending}
+                disabled={request.isPending}
+                onClick={() => request.mutate(data.id)}
+              >
+                Request enrollment
+              </Button>
+            )
+          ) : session.isPending ? (
+            <p className="text-sm text-ink-muted" role="status">Checking your account…</p>
+          ) : session.data?.role === 'ADMIN' ? (
+            <p className="max-w-sm text-sm text-ink-muted">
+              Enrollment requests are available to active student accounts.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2">
+              <Link
+                to="/login"
+                className="inline-flex cursor-pointer items-center rounded-lg bg-accent-600 px-3 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:bg-accent-700 hover:shadow-sm"
+              >
+                Sign in to request
+              </Link>
+              <Link
+                to="/register"
+                className="inline-flex cursor-pointer items-center rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-ink transition-all hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-50"
+              >
+                Apply Now
+              </Link>
+            </div>
+          )}
+        </div>
+        {request.error && (
+          <Alert tone="danger" className="mt-4">{request.error.message}</Alert>
+        )}
+        {request.isSuccess && (
+          <Alert tone="success" className="mt-4">
+            Request sent. An administrator will review your enrollment.
+          </Alert>
+        )}
       </section>
 
       {data.prerequisites.length > 0 && (
