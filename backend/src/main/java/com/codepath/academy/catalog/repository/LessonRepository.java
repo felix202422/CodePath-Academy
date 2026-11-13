@@ -14,6 +14,23 @@ public interface LessonRepository extends JpaRepository<Lesson, UUID> {
 
     List<Lesson> findByModuleIdOrderByDisplayOrderAsc(UUID moduleId);
 
+    List<Lesson> findByModuleIdAndStatusOrderByDisplayOrderAsc(UUID moduleId,
+                                                               ContentStatus status);
+
+    Optional<Lesson> findByIdAndStatus(UUID id, ContentStatus status);
+
+    /** Published lessons ordered by course module, then by lesson display order. */
+    @Query("""
+            select lesson from Lesson lesson, CourseModule module
+            where lesson.moduleId = module.id
+              and module.courseId = :courseId
+              and module.status = :status
+              and lesson.status = :status
+            order by module.displayOrder asc, lesson.displayOrder asc
+            """)
+    List<Lesson> findByCourseIdAndStatusInPublishedModules(@Param("courseId") UUID courseId,
+                                                           @Param("status") ContentStatus status);
+
     Optional<Lesson> findByModuleIdAndSlug(UUID moduleId, String slug);
 
     /** Importer lookup: the lesson row holding this exact source file. */

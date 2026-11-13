@@ -60,6 +60,13 @@ requests only for published courses, and scopes history to that student. Adminis
 each pending request once; the review row is locked during the decision and records reviewer,
 timestamp, and optional note. Public catalog enrollment totals aggregate approved rows only.
 
+The Phase 7 learning API lives under `/api/v1/me/learning/**` and requires ROLE_STUDENT. Every
+read and write re-checks an approved enrollment server-side, so a student can only see courses they
+were granted and only PUBLISHED modules and lessons. Completion writes lock the enrollment row
+before advancing the continue target, and lesson progress is stored in the existing
+`lesson_progress` table (no schema migration). The frontend lesson reader is lazy-loaded and
+renders imported Markdown through a `rehype-sanitize` pipeline rather than raw HTML.
+
 ## Content import and rendering
 
 The importer accepts only the configured CodePath-Masterclass repository or an administrator-selected

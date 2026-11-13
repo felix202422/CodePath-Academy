@@ -21,6 +21,28 @@ public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollme
     @EntityGraph(attributePaths = "course")
     List<CourseEnrollment> findTop100ByStudent_IdOrderByRequestedAtDesc(UUID studentId);
 
+    @EntityGraph(attributePaths = "course")
+    List<CourseEnrollment> findTop100ByStudent_IdAndStatusOrderByRequestedAtDesc(
+            UUID studentId, EnrollmentStatus status);
+
+    @EntityGraph(attributePaths = "course")
+    Optional<CourseEnrollment> findByCourse_IdAndStudent_IdAndStatus(
+            UUID courseId, UUID studentId, EnrollmentStatus status);
+
+    /** Lock the approved enrollment while lesson progress and last-access data are updated. */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @EntityGraph(attributePaths = "course")
+    @Query("""
+            select enrollment from CourseEnrollment enrollment
+            where enrollment.course.id = :courseId
+              and enrollment.student.id = :studentId
+              and enrollment.status = :status
+            """)
+    Optional<CourseEnrollment> findApprovedEnrollmentForUpdate(
+            @Param("courseId") UUID courseId,
+            @Param("studentId") UUID studentId,
+            @Param("status") EnrollmentStatus status);
+
     @EntityGraph(attributePaths = {"course", "student"})
     List<CourseEnrollment> findTop100ByStatusOrderByRequestedAtAsc(EnrollmentStatus status);
 

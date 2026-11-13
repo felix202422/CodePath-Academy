@@ -88,6 +88,8 @@ public class SecurityConfig {
                         .permitAll()
                         .requestMatchers("/api/v1/me/enrollments", "/api/v1/me/enrollments/**")
                         .hasRole("STUDENT")
+                        .requestMatchers("/api/v1/me/learning", "/api/v1/me/learning/**")
+                        .hasRole("STUDENT")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll())

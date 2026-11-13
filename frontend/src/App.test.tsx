@@ -48,6 +48,15 @@ function mockApi(session: SessionFixture | null = null) {
     if (url.includes('/api/v1/health')) {
       return json({ status: 'UP', service: 'codepath-academy', time: '2026-11-10T00:00:00Z' }, 200);
     }
+    if (url === '/api/v1/me/learning') {
+      return json({
+        enrolledCourseCount: 0,
+        totalLessonCount: 0,
+        completedLessonCount: 0,
+        progressPercent: 0,
+        courses: [],
+      }, 200);
+    }
     return json({ message: 'Not found' }, 404);
   });
 }

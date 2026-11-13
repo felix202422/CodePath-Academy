@@ -48,5 +48,10 @@ All notable changes to CodePath-Academy are documented here. Format follows
 - Phase 6 enrollment: active students can request access to published courses; administrators
   review requests with an optional note, and students see their own request history. Only approved
   enrollment rows contribute to public course counts.
+- Phase 7 student learning: approved students get a learning dashboard, an enrolled-course outline,
+  and a lazy-loaded lesson reader (`/api/v1/me/learning/**`, ROLE_STUDENT). Only published
+  modules/lessons of approved enrollments are exposed, lesson completion is recorded server-side
+  against the existing `lesson_progress` table, and the continue target advances with completed
+  lessons. Lesson Markdown is rendered through a sanitized GFM renderer.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

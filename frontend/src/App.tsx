@@ -1,7 +1,9 @@
+import { lazy, Suspense } from 'react';
 import { Route, Routes } from 'react-router';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
+import { SpinnerCentered } from './components/ui/Spinner';
 import { NotFoundPage } from './features/errors/NotFoundPage';
 import { AboutPage } from './features/public/AboutPage';
 import { CatalogPage } from './features/public/CatalogPage';
@@ -15,10 +17,18 @@ import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
 import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
 import { AdminEnrollmentsPage } from './features/admin/AdminEnrollmentsPage';
 import { MyEnrollmentsPage } from './features/student/MyEnrollmentsPage';
+import { MyLearningPage } from './features/student/MyLearningPage';
+import { StudentCoursePage } from './features/student/StudentCoursePage';
+import { StudentDashboardPage } from './features/student/StudentDashboardPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RequireRole } from './features/auth/RequireRole';
 import { ThemeProvider } from './features/theme/ThemeContext';
+
+const LessonReaderPage = lazy(async () => {
+  const module = await import('./features/student/LessonReaderPage');
+  return { default: module.LessonReaderPage };
+});
 
 /**
  * Route tree. Layouts establish the public/student/admin shells (Phase 2);
@@ -47,23 +57,17 @@ export default function App() {
         <Route path="/student" element={<StudentLayout />}>
           <Route
             index
-            element={
-              <PlaceholderPage
-                title="Student dashboard"
-                phase="Phase 7 — Student learning"
-                description="Your enrolled courses, continue-where-you-left-off lessons, and overall progress at a glance."
-              />
-            }
+            element={<StudentDashboardPage />}
           />
+          <Route path="learning" element={<MyLearningPage />} />
+          <Route path="learning/:courseSlug" element={<StudentCoursePage />} />
           <Route
-            path="learning"
-            element={
-              <PlaceholderPage
-                title="My learning"
-                phase="Phase 7 — Student learning"
-                description="Lesson reader with persistent completion tracking across every course you are enrolled in."
-              />
-            }
+            path="learning/:courseSlug/lessons/:lessonId"
+            element={(
+              <Suspense fallback={<SpinnerCentered label="Loading lesson reader…" />}>
+                <LessonReaderPage />
+              </Suspense>
+            )}
           />
           <Route path="enrollments" element={<MyEnrollmentsPage />} />
           <Route

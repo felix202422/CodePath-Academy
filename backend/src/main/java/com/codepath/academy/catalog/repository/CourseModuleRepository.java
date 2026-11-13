@@ -1,5 +1,6 @@
 package com.codepath.academy.catalog.repository;
 
+import com.codepath.academy.catalog.model.ContentStatus;
 import com.codepath.academy.catalog.model.CourseModule;
 import java.util.List;
 import java.util.Optional;
@@ -12,6 +13,9 @@ import org.springframework.data.repository.query.Param;
 public interface CourseModuleRepository extends JpaRepository<CourseModule, UUID> {
 
     List<CourseModule> findByCourseIdOrderByDisplayOrderAsc(UUID courseId);
+
+    List<CourseModule> findByCourseIdAndStatusOrderByDisplayOrderAsc(UUID courseId,
+                                                                     ContentStatus status);
 
     Optional<CourseModule> findByIdAndCourseId(UUID id, UUID courseId);
 
