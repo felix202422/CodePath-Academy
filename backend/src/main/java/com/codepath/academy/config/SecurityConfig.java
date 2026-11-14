@@ -90,6 +90,8 @@ public class SecurityConfig {
                         .hasRole("STUDENT")
                         .requestMatchers("/api/v1/me/learning", "/api/v1/me/learning/**")
                         .hasRole("STUDENT")
+                        .requestMatchers("/api/v1/me/assessments", "/api/v1/me/assessments/**")
+                        .hasRole("STUDENT")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll())
