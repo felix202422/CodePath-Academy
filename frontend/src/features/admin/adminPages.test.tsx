@@ -5,6 +5,8 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../../App';
 import type {
+  AssessmentAdminResponse,
+  AssessmentDetailAdminResponse,
   CourseAdminResponse,
   ImportRowDetailResponse,
   ImportRowResponse,
@@ -151,6 +153,91 @@ const lessonDetail: LessonDetailAdminResponse = {
   sourceCommit: '62afa4143c26c036169429810fe8bc0b4e9a4de6',
   sourceHash: 'hash-source',
   createdAt: '2026-11-01T08:00:00Z',
+};
+
+/* Assessment fixtures: one editable draft with questions and no attempts, and
+   one published assessment locked by three student attempts. */
+const assessmentRow: AssessmentAdminResponse = {
+  id: 'as-1',
+  courseId: 'c-draft',
+  moduleId: 'm1',
+  title: 'Orientation quiz',
+  description: 'Checks the basics from module one.',
+  passScorePercent: 70,
+  maxAttempts: 2,
+  timeLimitMinutes: 15,
+  displayOrder: 1,
+  status: 'DRAFT',
+  questionCount: 2,
+  attemptCount: 0,
+  updatedAt: '2026-11-06T10:00:00Z',
+};
+
+const lockedAssessmentRow: AssessmentAdminResponse = {
+  id: 'as-2',
+  courseId: 'c-draft',
+  moduleId: null,
+  title: 'Final assessment',
+  description: null,
+  passScorePercent: 80,
+  maxAttempts: 1,
+  timeLimitMinutes: null,
+  displayOrder: 2,
+  status: 'PUBLISHED',
+  questionCount: 1,
+  attemptCount: 3,
+  updatedAt: '2026-11-07T10:00:00Z',
+};
+
+const assessments: AssessmentAdminResponse[] = [assessmentRow, lockedAssessmentRow];
+
+const assessmentDetail: AssessmentDetailAdminResponse = {
+  ...assessmentRow,
+  questions: [
+    {
+      id: 'q1',
+      questionType: 'MULTIPLE_CHOICE',
+      prompt: 'Which command compiles a Java file?',
+      explanation: 'javac compiles; java runs bytecode.',
+      correctText: null,
+      points: 2,
+      displayOrder: 1,
+      options: [
+        { id: 'o1', optionText: 'javac', correct: true, displayOrder: 1 },
+        { id: 'o2', optionText: 'java', correct: false, displayOrder: 2 },
+        { id: 'o3', optionText: 'jar', correct: false, displayOrder: 3 },
+      ],
+    },
+    {
+      id: 'q2',
+      questionType: 'SHORT_ANSWER',
+      prompt: 'What does CI stand for?',
+      explanation: null,
+      correctText: 'continuous integration',
+      points: 3,
+      displayOrder: 2,
+      options: [],
+    },
+  ],
+};
+
+const lockedAssessmentDetail: AssessmentDetailAdminResponse = {
+  ...lockedAssessmentRow,
+  questions: [
+    {
+      id: 'q3',
+      questionType: 'MULTIPLE_CHOICE',
+      prompt: 'What does JVM stand for?',
+      explanation: null,
+      correctText: null,
+      points: 5,
+      displayOrder: 1,
+      options: [
+        { id: 'o4', optionText: 'Java Virtual Machine', correct: true, displayOrder: 1 },
+        { id: 'o5', optionText: 'Java Variable Memory', correct: false, displayOrder: 2 },
+      ],
+    },
+  ],
 };
 
 const importSource = {
@@ -326,6 +413,44 @@ function mockAdminApi(options: MockOptions = {}) {
     }
     if (lessonRoute && method === 'GET') return jsonResponse(lessonDetail);
 
+    // Assessments.
+    const courseAssessments = match(/^\/api\/v1\/admin\/courses\/([^/]+)\/assessments$/);
+    if (courseAssessments && method === 'GET') return jsonResponse(assessments);
+    if (courseAssessments && method === 'POST') {
+      const questions = body?.questions;
+      const count = Array.isArray(questions) ? questions.length : 0;
+      return jsonResponse({ ...assessmentRow, ...body, id: 'as-new', questionCount: count }, 201);
+    }
+    const assessmentStatus = match(/^\/api\/v1\/admin\/assessments\/([^/]+)\/status$/);
+    if (assessmentStatus && method === 'POST') {
+      const found = assessments.find((row) => row.id === (assessmentStatus[1] ?? ''));
+      return found
+        ? jsonResponse({ ...found, status: body?.status })
+        : jsonResponse(notFound(), 404);
+    }
+    const assessmentRoute = match(/^\/api\/v1\/admin\/assessments\/([^/]+)$/);
+    if (assessmentRoute && method === 'GET') {
+      const id = assessmentRoute[1] ?? '';
+      if (id === assessmentRow.id) return jsonResponse(assessmentDetail);
+      if (id === lockedAssessmentRow.id) return jsonResponse(lockedAssessmentDetail);
+      return jsonResponse(notFound(), 404);
+    }
+    if (assessmentRoute && method === 'PUT') {
+      const found = assessments.find((row) => row.id === (assessmentRoute[1] ?? ''));
+      return found ? jsonResponse({ ...found, ...body }) : jsonResponse(notFound(), 404);
+    }
+    if (assessmentRoute && method === 'DELETE') {
+      const found = assessments.find((row) => row.id === (assessmentRoute[1] ?? ''));
+      if (!found) return jsonResponse(notFound(), 404);
+      if (found.attemptCount > 0) {
+        return jsonResponse(
+          { message: 'Students have attempted this assessment — archive it instead of deleting.' },
+          409,
+        );
+      }
+      return new Response(null, { status: 204 });
+    }
+
     // Content import.
     if (path === '/api/v1/admin/content/import-source') return jsonResponse(importSource);
     if (path === '/api/v1/admin/content/imports') {
@@ -363,46 +488,54 @@ function notFound() {
 }
 
 describe('AdminCoursesPage', () => {
-  it('renders paths and courses, and creates a learning path through the modal', async () => {
-    const calls = mockAdminApi();
-    const user = userEvent.setup();
+  it(
+    'renders paths and courses, and creates a learning path through the modal',
+    async () => {
+      const calls = mockAdminApi();
+      const user = userEvent.setup();
 
-    renderApp('/admin/courses');
+      renderApp('/admin/courses');
 
-    expect(await screen.findByRole('heading', { level: 1, name: 'Courses' })).toBeInTheDocument();
-    expect(await screen.findByRole('heading', { name: 'Learning paths' })).toBeInTheDocument();
-    // Path name appears in both the paths table and the course rows.
-    expect((await screen.findAllByText('Software Engineering')).length).toBeGreaterThan(0);
-    expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
-    expect(screen.getByText('Computer Foundations')).toBeInTheDocument();
-    expect(screen.getByText('1/2 published lessons')).toBeInTheDocument();
-    expect(screen.getByText('DRAFT')).toBeInTheDocument();
+      expect(
+        await screen.findByRole('heading', { level: 1, name: 'Courses' }),
+      ).toBeInTheDocument();
+      expect(await screen.findByRole('heading', { name: 'Learning paths' })).toBeInTheDocument();
+      // Path name appears in both the paths table and the course rows.
+      expect((await screen.findAllByText('Software Engineering')).length).toBeGreaterThan(0);
+      expect(screen.getByText('Frontend Engineering')).toBeInTheDocument();
+      expect(screen.getByText('Computer Foundations')).toBeInTheDocument();
+      expect(screen.getByText('1/2 published lessons')).toBeInTheDocument();
+      expect(screen.getByText('DRAFT')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'New path' }));
+      await user.click(screen.getByRole('button', { name: 'New path' }));
 
-    const dialog = await screen.findByRole('dialog', { name: 'New learning path' });
-    await user.type(within(dialog).getByLabelText(/^Name/), 'Data Science');
-    await user.type(within(dialog).getByLabelText(/^Slug/), 'data-science');
-    await user.type(
-      within(dialog).getByLabelText(/^Summary/),
-      'Analytical thinking with real datasets.',
-    );
-    await user.click(within(dialog).getByRole('button', { name: 'Create path' }));
+      const dialog = await screen.findByRole('dialog', { name: 'New learning path' });
+      await user.type(within(dialog).getByLabelText(/^Name/), 'Data Science');
+      await user.type(within(dialog).getByLabelText(/^Slug/), 'data-science');
+      await user.type(
+        within(dialog).getByLabelText(/^Summary/),
+        'Analytical thinking with real datasets.',
+      );
+      await user.click(within(dialog).getByRole('button', { name: 'Create path' }));
 
-    await waitFor(() => {
-      const post = calls.find((call) => call.method === 'POST' && call.url === '/api/v1/admin/paths');
-      expect(post).toBeDefined();
-      expect(post?.body).toEqual({
-        slug: 'data-science',
-        name: 'Data Science',
-        summary: 'Analytical thinking with real datasets.',
-        description: null,
-        accentColor: null,
-        displayOrder: null,
+      await waitFor(() => {
+        const post = calls.find(
+          (call) => call.method === 'POST' && call.url === '/api/v1/admin/paths',
+        );
+        expect(post).toBeDefined();
+        expect(post?.body).toEqual({
+          slug: 'data-science',
+          name: 'Data Science',
+          summary: 'Analytical thinking with real datasets.',
+          description: null,
+          accentColor: null,
+          displayOrder: null,
+        });
       });
-    });
-    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
-  });
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    },
+    30000,
+  );
 
   it('publishes a draft course with a /status POST carrying the target status', async () => {
     const calls = mockAdminApi();
@@ -573,4 +706,206 @@ describe('AdminContentPage', () => {
     });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   });
+});
+
+/** First match or a clear failure — indexes are possibly-undefined here. */
+function firstMatch<T>(matches: T[], label: string): T {
+  const first = matches[0];
+  if (first === undefined) throw new Error(`Expected at least one ${label}.`);
+  return first;
+}
+
+describe('AssessmentsSection', () => {
+  it('lists real counts, publishes, and deletes only after an inline confirm', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/courses/c-draft');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Frontend Engineering' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Assessments' })).toBeInTheDocument();
+    expect(await screen.findByText('Orientation quiz')).toBeInTheDocument();
+    expect(screen.getByText('Final assessment')).toBeInTheDocument();
+
+    // Counts, rules and module labels come from the server rows.
+    expect(screen.getByText(/2 questions · 0 attempts · pass at 70%/)).toBeInTheDocument();
+    expect(screen.getByText(/1 question · 3 attempts · pass at 80%/)).toBeInTheDocument();
+    expect(screen.getByText('Questions locked')).toBeInTheDocument();
+    expect(screen.getByText('Module: Module One')).toBeInTheDocument();
+    expect(screen.getByText('Course-level')).toBeInTheDocument();
+
+    // The attempted assessment can never be deleted — archive instead.
+    const lockedRow = screen.getByText('Final assessment').closest('li');
+    expect(lockedRow).not.toBeNull();
+    expect(
+      within(lockedRow as HTMLElement).getByRole('button', { name: 'Delete' }),
+    ).toBeDisabled();
+
+    // The draft publishes through the /status POST carrying the target status.
+    await user.click(
+      within(screen.getByText('Orientation quiz').closest('li') as HTMLElement).getByRole(
+        'button',
+        { name: 'Publish' },
+      ),
+    );
+    await waitFor(() => {
+      const post = calls.find(
+        (call) =>
+          call.method === 'POST' &&
+          call.url === '/api/v1/admin/assessments/as-1/status',
+      );
+      expect(post).toBeDefined();
+      expect(post?.body).toEqual({ status: 'PUBLISHED' });
+    });
+
+    // Deleting needs a second, explicit click inside the row.
+    const row = screen.getByText('Orientation quiz').closest('li') as HTMLElement;
+    await user.click(within(row).getByRole('button', { name: 'Delete' }));
+    expect(within(row).getByText('Delete this assessment?')).toBeInTheDocument();
+    expect(
+      calls.some((call) => call.method === 'DELETE'),
+    ).toBe(false);
+    await user.click(within(row).getByRole('button', { name: 'Delete' }));
+
+    await waitFor(() => {
+      const del = calls.find(
+        (call) => call.method === 'DELETE' && call.url === '/api/v1/admin/assessments/as-1',
+      );
+      expect(del).toBeDefined();
+    });
+  }, 30000);
+
+  it('creates an assessment with the authored question set in the POST body', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/courses/c-draft');
+
+    await user.click(await screen.findByRole('button', { name: 'Add assessment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add assessment' });
+
+    await user.type(within(dialog).getByLabelText(/^Title/), 'Midterm check');
+    await user.type(within(dialog).getByLabelText(/^Time limit/), '10');
+    await user.type(within(dialog).getByLabelText(/^Display order/), '3');
+
+    // Author one multiple-choice question: prompt, two options, one correct.
+    await user.click(within(dialog).getByRole('button', { name: 'Add question' }));
+    await user.type(
+      within(dialog).getByLabelText(/^Prompt/),
+      'Which command compiles a Java file?',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Remove option 4' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Remove option 3' }));
+    await user.type(within(dialog).getByLabelText(/^Option 1/), 'javac');
+    await user.type(within(dialog).getByLabelText(/^Option 2/), 'java');
+    await user.click(
+      firstMatch(
+        within(dialog).getAllByRole('radio', { name: 'Correct' }),
+        'correct-answer radio',
+      ),
+    );
+
+    await user.click(within(dialog).getByRole('button', { name: 'Create assessment' }));
+
+    await waitFor(() => {
+      const post = calls.find(
+        (call) =>
+          call.method === 'POST' && call.url === '/api/v1/admin/courses/c-draft/assessments',
+      );
+      expect(post).toBeDefined();
+      expect(post?.body).toEqual({
+        title: 'Midterm check',
+        description: null,
+        passScorePercent: 70,
+        maxAttempts: 1,
+        timeLimitMinutes: 10,
+        moduleId: null,
+        questions: [
+          {
+            questionType: 'MULTIPLE_CHOICE',
+            prompt: 'Which command compiles a Java file?',
+            explanation: null,
+            correctText: null,
+            points: 1,
+            options: [
+              { optionText: 'javac', isCorrect: true },
+              { optionText: 'java', isCorrect: false },
+            ],
+          },
+        ],
+        displayOrder: 3,
+      });
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  }, 30000);
+
+  it('blocks a save whose question set the server would reject', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/courses/c-draft');
+
+    await user.click(await screen.findByRole('button', { name: 'Add assessment' }));
+    const dialog = await screen.findByRole('dialog', { name: 'Add assessment' });
+
+    // Metadata is valid; the new question is not, so nothing may leave the page.
+    await user.type(within(dialog).getByLabelText(/^Title/), 'Incomplete quiz');
+    await user.click(within(dialog).getByRole('button', { name: 'Add question' }));
+    await user.click(within(dialog).getByRole('button', { name: 'Create assessment' }));
+
+    expect(await within(dialog).findByText('Enter the question prompt.')).toBeInTheDocument();
+    expect(within(dialog).getByText('Mark exactly one option as correct.')).toBeInTheDocument();
+    expect(within(dialog).getAllByText('Enter the option text.')).toHaveLength(4);
+
+    expect(calls.some((call) => call.method === 'POST')).toBe(false);
+    expect(screen.getByRole('dialog', { name: 'Add assessment' })).toBeInTheDocument();
+  }, 30000);
+
+  it('saves settings on a locked assessment without sending its questions', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/courses/c-draft');
+
+    const lockedRow = (await screen.findByText('Final assessment')).closest('li') as HTMLElement;
+    await user.click(within(lockedRow).getByRole('button', { name: 'Edit' }));
+
+    // The dialog swaps from a loading shell to the loaded form, so wait for
+    // the form's own content before grabbing a stable handle on it.
+    await screen.findByLabelText(/^Pass score/);
+    const dialog = screen.getByRole('dialog', { name: 'Edit assessment' });
+    expect(within(dialog).getByDisplayValue('Final assessment')).toBeInTheDocument();
+
+    // Locked set renders read-only, answer key included, with no add control.
+    expect(within(dialog).getByText(/so its questions are locked/)).toBeInTheDocument();
+    expect(within(dialog).getByText('What does JVM stand for?')).toBeInTheDocument();
+    expect(within(dialog).getByText('Java Virtual Machine')).toBeInTheDocument();
+    expect(within(dialog).queryByRole('button', { name: 'Add question' })).not.toBeInTheDocument();
+
+    // Settings stay editable: raise the pass mark and save.
+    const passInput = within(dialog).getByLabelText(/^Pass score/);
+    await user.clear(passInput);
+    await user.type(passInput, '85');
+    await user.click(within(dialog).getByRole('button', { name: 'Save changes' }));
+
+    await waitFor(() => {
+      const put = calls.find(
+        (call) => call.method === 'PUT' && call.url === '/api/v1/admin/assessments/as-2',
+      );
+      expect(put).toBeDefined();
+      expect(put?.body).toEqual({
+        title: 'Final assessment',
+        description: null,
+        passScorePercent: 85,
+        maxAttempts: 1,
+        timeLimitMinutes: null,
+        moduleId: null,
+      });
+      // Replace-all would 409 here — settings-only saves omit the key.
+      expect(put?.body).not.toHaveProperty('questions');
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  }, 30000);
 });

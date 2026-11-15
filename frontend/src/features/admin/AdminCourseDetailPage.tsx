@@ -7,6 +7,7 @@ import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SpinnerCentered } from '../../components/ui/Spinner';
 import { AdminQueryState } from './AdminQueryState';
+import { AssessmentsSection } from './AssessmentsSection';
 import { LessonFormModal } from './LessonFormModal';
 import { ModuleFormModal } from './ModuleFormModal';
 import { StatusButtons } from './StatusButtons';
@@ -298,6 +299,8 @@ export function AdminCourseDetailPage() {
                 </ul>
               )}
             </section>
+
+            <AssessmentsSection courseId={course.id} modules={modules} />
 
             {moduleModal.open && (
               <ModuleFormModal

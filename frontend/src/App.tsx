@@ -18,6 +18,9 @@ import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
 import { AdminEnrollmentsPage } from './features/admin/AdminEnrollmentsPage';
 import { MyEnrollmentsPage } from './features/student/MyEnrollmentsPage';
 import { MyLearningPage } from './features/student/MyLearningPage';
+import { MyAssessmentsPage } from './features/student/MyAssessmentsPage';
+import { TakeAssessmentPage } from './features/student/TakeAssessmentPage';
+import { AssessmentResultPage } from './features/student/AssessmentResultPage';
 import { StudentCoursePage } from './features/student/StudentCoursePage';
 import { StudentDashboardPage } from './features/student/StudentDashboardPage';
 import { LoginPage } from './features/auth/LoginPage';
@@ -70,16 +73,9 @@ export default function App() {
             )}
           />
           <Route path="enrollments" element={<MyEnrollmentsPage />} />
-          <Route
-            path="assessments"
-            element={
-              <PlaceholderPage
-                title="Assessments"
-                phase="Phase 8 — Assessments"
-                description="Assigned quizzes and assignments with server-side grading and honest feedback."
-              />
-            }
-          />
+          <Route path="assessments" element={<MyAssessmentsPage />} />
+          <Route path="assessments/attempts/:attemptId" element={<AssessmentResultPage />} />
+          <Route path="assessments/:assessmentId" element={<TakeAssessmentPage />} />
           <Route
             path="profile"
             element={

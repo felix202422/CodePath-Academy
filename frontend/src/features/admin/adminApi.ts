@@ -194,6 +194,85 @@ export interface ImportRowDetailResponse extends ImportRowResponse {
   proposedBody: string | null;
 }
 
+/* ------------------------------------------------------------ assessments */
+
+/** Question kinds an administrator can author; grading rules live server-side. */
+export type QuestionType = 'MULTIPLE_CHOICE' | 'TRUE_FALSE' | 'MULTI_ANSWER' | 'SHORT_ANSWER';
+
+/** List row for one assessment with the real question and attempt counts. */
+export interface AssessmentAdminResponse {
+  id: string;
+  courseId: string;
+  moduleId: string | null;
+  title: string;
+  description: string | null;
+  passScorePercent: number;
+  maxAttempts: number;
+  timeLimitMinutes: number | null;
+  displayOrder: number;
+  status: ContentStatus;
+  questionCount: number;
+  attemptCount: number;
+  updatedAt: string;
+}
+
+/** One option including whether it is the correct answer. */
+export interface AssessmentOptionAdminResponse {
+  id: string;
+  optionText: string;
+  correct: boolean;
+  displayOrder: number;
+}
+
+/** One authored question with its options and answer key. */
+export interface AssessmentQuestionAdminResponse {
+  id: string;
+  questionType: QuestionType;
+  prompt: string;
+  explanation: string | null;
+  correctText: string | null;
+  points: number;
+  displayOrder: number;
+  options: AssessmentOptionAdminResponse[];
+}
+
+/** Authoring detail: the list row plus the full question set. */
+export interface AssessmentDetailAdminResponse extends AssessmentAdminResponse {
+  questions: AssessmentQuestionAdminResponse[];
+}
+
+export interface AssessmentOptionWriteRequest {
+  optionText: string;
+  isCorrect: boolean;
+}
+
+export interface AssessmentQuestionWriteRequest {
+  questionType: QuestionType;
+  prompt: string;
+  explanation?: string | null;
+  /** Required for SHORT_ANSWER; ignored for every other type. */
+  correctText?: string | null;
+  points: number;
+  options?: AssessmentOptionWriteRequest[] | null;
+}
+
+/**
+ * Create/update payload. Omitting `questions` on update leaves the stored
+ * set untouched; supplying it replaces the whole set (a conflict once any
+ * attempt exists). `displayOrder` is create-only — the server leaves the
+ * stored order unchanged when it is null.
+ */
+export interface AssessmentWriteRequest {
+  title: string;
+  description?: string | null;
+  passScorePercent?: number | null;
+  maxAttempts?: number | null;
+  timeLimitMinutes?: number | null;
+  displayOrder?: number | null;
+  moduleId?: string | null;
+  questions?: AssessmentQuestionWriteRequest[] | null;
+}
+
 /**
  * Query keys. The `*` roots (paths, courses, course, module, lesson, imports)
  * exist only as invalidation prefixes — individual queries always use the
@@ -206,6 +285,8 @@ export const adminQueryKeys = {
   module: (moduleId: string) => ['admin', 'module', moduleId] as const,
   lessons: (moduleId: string) => ['admin', 'module', moduleId, 'lessons'] as const,
   lesson: (lessonId: string) => ['admin', 'lesson', lessonId] as const,
+  assessments: (courseId: string) => ['admin', 'course', courseId, 'assessments'] as const,
+  assessment: (assessmentId: string) => ['admin', 'assessment', assessmentId] as const,
   importSource: () => ['admin', 'import-source'] as const,
   imports: (status?: ImportStatus) => ['admin', 'imports', status ?? 'all'] as const,
   importRow: (importId: string) => ['admin', 'import', importId] as const,
@@ -358,6 +439,57 @@ export function setLessonStatus(
   );
 }
 
+/* ---------------------------------------------------------- assessments */
+
+export function listAssessments(courseId: string): Promise<AssessmentAdminResponse[]> {
+  return apiFetch<AssessmentAdminResponse[]>(
+    `/api/v1/admin/courses/${encodeURIComponent(courseId)}/assessments`,
+  );
+}
+
+export function createAssessment(
+  courseId: string,
+  body: AssessmentWriteRequest,
+): Promise<AssessmentAdminResponse> {
+  return apiFetch<AssessmentAdminResponse>(
+    `/api/v1/admin/courses/${encodeURIComponent(courseId)}/assessments`,
+    { method: 'POST', body },
+  );
+}
+
+export function getAssessment(id: string): Promise<AssessmentDetailAdminResponse> {
+  return apiFetch<AssessmentDetailAdminResponse>(
+    `/api/v1/admin/assessments/${encodeURIComponent(id)}`,
+  );
+}
+
+export function updateAssessment(
+  id: string,
+  body: AssessmentWriteRequest,
+): Promise<AssessmentAdminResponse> {
+  return apiFetch<AssessmentAdminResponse>(`/api/v1/admin/assessments/${encodeURIComponent(id)}`, {
+    method: 'PUT',
+    body,
+  });
+}
+
+export function setAssessmentStatus(
+  id: string,
+  status: ContentStatus,
+): Promise<AssessmentAdminResponse> {
+  return apiFetch<AssessmentAdminResponse>(
+    `/api/v1/admin/assessments/${encodeURIComponent(id)}/status`,
+    { method: 'POST', body: { status } },
+  );
+}
+
+/** 204 on success; the server rejects the delete once attempts exist. */
+export function deleteAssessment(id: string): Promise<void> {
+  return apiFetch<void>(`/api/v1/admin/assessments/${encodeURIComponent(id)}`, {
+    method: 'DELETE',
+  });
+}
+
 /* --------------------------------------------------------------- imports */
 
 export function getImportSource(): Promise<ImportSourceResponse> {
@@ -441,6 +573,23 @@ export function useLessonDetail(lessonId: string, enabled: boolean) {
     queryKey: adminQueryKeys.lesson(lessonId),
     queryFn: () => getLesson(lessonId),
     enabled: enabled && lessonId.length > 0,
+  });
+}
+
+export function useAdminAssessments(courseId: string) {
+  return useQuery({
+    queryKey: adminQueryKeys.assessments(courseId),
+    queryFn: () => listAssessments(courseId),
+    enabled: courseId.length > 0,
+  });
+}
+
+/** Question set for the authoring modal; fetched only while it is open. */
+export function useAssessmentDetail(assessmentId: string, enabled: boolean) {
+  return useQuery({
+    queryKey: adminQueryKeys.assessment(assessmentId),
+    queryFn: () => getAssessment(assessmentId),
+    enabled: enabled && assessmentId.length > 0,
   });
 }
 
@@ -610,6 +759,59 @@ export function useSetLessonStatus() {
       void queryClient.invalidateQueries({ queryKey: MODULE_KEY });
       void queryClient.invalidateQueries({ queryKey: COURSE_KEY });
       void queryClient.invalidateQueries({ queryKey: COURSES_KEY });
+    },
+  });
+}
+
+export function useCreateAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ courseId, body }: { courseId: string; body: AssessmentWriteRequest }) =>
+      createAssessment(courseId, body),
+    onSuccess: (assessment) => {
+      void queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.assessments(assessment.courseId),
+      });
+    },
+  });
+}
+
+export function useUpdateAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: AssessmentWriteRequest }) =>
+      updateAssessment(id, body),
+    onSuccess: (assessment) => {
+      void queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.assessments(assessment.courseId),
+      });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.assessment(assessment.id) });
+    },
+  });
+}
+
+export function useSetAssessmentStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ContentStatus }) =>
+      setAssessmentStatus(id, status),
+    onSuccess: (assessment) => {
+      void queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.assessments(assessment.courseId),
+      });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.assessment(assessment.id) });
+    },
+  });
+}
+
+export function useDeleteAssessment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id }: { id: string; courseId: string }) => deleteAssessment(id),
+    onSuccess: (_data, variables) => {
+      void queryClient.invalidateQueries({
+        queryKey: adminQueryKeys.assessments(variables.courseId),
+      });
     },
   });
 }
