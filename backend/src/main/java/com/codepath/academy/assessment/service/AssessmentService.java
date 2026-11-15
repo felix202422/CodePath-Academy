@@ -330,11 +330,13 @@ public class AssessmentService {
         return selected;
     }
 
+    // findFirst before mapping: choice submissions carry a null answerText,
+    // and findFirst over a mapped-to-null stream throws on Optional.of(null).
     private String answerTextFor(SubmitAttemptRequest request, UUID questionId) {
         return request.answers().stream()
                 .filter(submission -> submission.questionId().equals(questionId))
-                .map(SubmitAttemptRequest.AnswerSubmission::answerText)
                 .findFirst()
+                .map(SubmitAttemptRequest.AnswerSubmission::answerText)
                 .orElse(null);
     }
 

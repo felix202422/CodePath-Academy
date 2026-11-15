@@ -204,18 +204,12 @@ public class AdminAssessmentService {
      */
     private void replaceQuestions(Assessment assessment, List<QuestionWriteRequest> requests) {
         // Validate first, then wipe and rewrite — a late validation failure
-        // must not destroy the previously stored question set.
+        // must not destroy the previously stored question set. Both wipes are
+        // bulk statements: entity-level option deletes would queue flushes
+        // against rows the question cascade removes first.
         validateQuestions(requests);
 
-        List<AssessmentQuestion> existing = questionRepository
-                .findByAssessmentIdOrderByDisplayOrderAsc(assessment.getId());
-        if (!existing.isEmpty()) {
-            List<UUID> existingIds = existing.stream()
-                    .map(AssessmentQuestion::getId)
-                    .toList();
-            optionRepository.deleteAll(
-                    optionRepository.findByQuestionIdInOrderByDisplayOrderAsc(existingIds));
-        }
+        optionRepository.deleteAllForAssessment(assessment.getId());
         questionRepository.deleteAllForAssessment(assessment.getId());
 
         List<AssessmentQuestion> saved = new ArrayList<>();
