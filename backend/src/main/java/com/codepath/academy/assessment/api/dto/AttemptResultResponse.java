@@ -35,7 +35,11 @@ public record AttemptResultResponse(
         boolean timeExpired,
         List<QuestionResult> questions) {
 
-    /** One question's outcome after grading. */
+    /**
+     * One question's outcome after grading. The option id lists are paired
+     * with parallel text lists in display order so a result screen can show
+     * what was actually selected without resolving ids client-side.
+     */
     public record QuestionResult(
             UUID questionId,
             QuestionType questionType,
@@ -43,10 +47,12 @@ public record AttemptResultResponse(
             int points,
             String explanation,
             List<UUID> yourOptionIds,
+            List<String> yourOptionTexts,
             String yourAnswerText,
             boolean isCorrect,
             int pointsAwarded,
             List<UUID> correctOptionIds,
+            List<String> correctOptionTexts,
             String correctAnswerText) {
     }
 
@@ -71,21 +77,35 @@ public record AttemptResultResponse(
                     AssessmentAnswer answer = answersByQuestion.get(question.getId());
                     List<AssessmentOption> questionOptions = optionsByQuestion
                             .getOrDefault(question.getId(), List.of());
-                    List<UUID> yourOptionIds = answer == null ? List.of()
+                    List<UUID> selected = answer == null ? List.of()
                             : selectedByAnswer.getOrDefault(answer.getId(), List.of());
+                    // Both lists follow the stored display order so ids and
+                    // texts stay parallel for the result screen.
+                    List<UUID> yourOptionIds = questionOptions.stream()
+                            .filter(option -> selected.contains(option.getId()))
+                            .map(AssessmentOption::getId)
+                            .toList();
+                    List<String> yourOptionTexts = questionOptions.stream()
+                            .filter(option -> selected.contains(option.getId()))
+                            .map(AssessmentOption::getOptionText)
+                            .toList();
                     List<UUID> correctOptionIds = questionOptions.stream()
                             .filter(AssessmentOption::isCorrect)
                             .map(AssessmentOption::getId)
+                            .toList();
+                    List<String> correctOptionTexts = questionOptions.stream()
+                            .filter(AssessmentOption::isCorrect)
+                            .map(AssessmentOption::getOptionText)
                             .toList();
                     boolean shortAnswer = question.getQuestionType() == QuestionType.SHORT_ANSWER;
                     return new QuestionResult(
                             question.getId(), question.getQuestionType(), question.getPrompt(),
                             question.getPoints(), question.getExplanation(),
-                            yourOptionIds,
+                            yourOptionIds, yourOptionTexts,
                             answer == null ? null : answer.getAnswerText(),
                             answer != null && Boolean.TRUE.equals(answer.getCorrect()),
                             answer == null ? 0 : answer.getPointsAwarded(),
-                            shortAnswer ? List.of() : correctOptionIds,
+                            correctOptionIds, correctOptionTexts,
                             shortAnswer ? question.getCorrectText() : null);
                 })
                 .toList();

@@ -40,10 +40,13 @@ class AssessmentJsonContractTest {
         UUID questionId = UUID.randomUUID();
         QuestionResult result = new QuestionResult(
                 questionId, QuestionType.MULTIPLE_CHOICE, "Prompt?", 2, "Why.",
-                List.of(), null, true, 2, List.of(UUID.randomUUID()), null);
+                List.of(), List.of(), null, true, 2,
+                List.of(UUID.randomUUID()), List.of("Option"), null);
         String json = mapper.writeValueAsString(result);
         assertTrue(json.contains("\"isCorrect\":true"),
                 "result JSON must expose isCorrect, was: " + json);
+        assertTrue(json.contains("\"correctOptionTexts\":[\"Option\"]"),
+                "result JSON must expose correct option texts, was: " + json);
 
         QuestionResult parsed = mapper.readValue(json, QuestionResult.class);
         assertTrue(parsed.isCorrect());
