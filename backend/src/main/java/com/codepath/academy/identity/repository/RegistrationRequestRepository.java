@@ -12,6 +12,8 @@ public interface RegistrationRequestRepository extends JpaRepository<Registratio
 
     List<RegistrationRequest> findByStatusOrderByCreatedAtAsc(RegistrationStatus status);
 
+    long countByStatus(RegistrationStatus status);
+
     Optional<RegistrationRequest> findByUserId(UUID userId);
 
     @Query("select r from RegistrationRequest r join fetch r.user where r.id = :id")

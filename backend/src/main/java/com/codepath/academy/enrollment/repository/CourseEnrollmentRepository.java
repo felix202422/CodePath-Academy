@@ -57,6 +57,8 @@ public interface CourseEnrollmentRepository extends JpaRepository<CourseEnrollme
 
     long countByCourse_IdAndStatus(UUID courseId, EnrollmentStatus status);
 
+    long countByStatus(EnrollmentStatus status);
+
     /** Efficient real-time enrollment counts for the published public catalog. */
     @Query("""
             select enrollment.course.id as courseId, count(enrollment.id) as enrollmentCount

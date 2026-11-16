@@ -18,6 +18,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.csrf.CsrfToken;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
@@ -37,10 +38,13 @@ public class SecurityConfig {
 
     private final AppProperties properties;
     private final ApiSecurityHandlers securityHandlers;
+    private final AccountStatusFilter accountStatusFilter;
 
-    public SecurityConfig(AppProperties properties, ApiSecurityHandlers securityHandlers) {
+    public SecurityConfig(AppProperties properties, ApiSecurityHandlers securityHandlers,
+                          AccountStatusFilter accountStatusFilter) {
         this.properties = properties;
         this.securityHandlers = securityHandlers;
+        this.accountStatusFilter = accountStatusFilter;
     }
 
     @Bean
@@ -92,9 +96,14 @@ public class SecurityConfig {
                         .hasRole("STUDENT")
                         .requestMatchers("/api/v1/me/assessments", "/api/v1/me/assessments/**")
                         .hasRole("STUDENT")
+                        .requestMatchers("/api/v1/me/announcements", "/api/v1/me/announcements/**")
+                        .hasRole("STUDENT")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
                         .requestMatchers("/api/v1/**").authenticated()
                         .anyRequest().permitAll())
+                // Re-check account status after authorization so a session issued
+                // before a suspension cannot keep using /me or /admin endpoints.
+                .addFilterAfter(accountStatusFilter, AuthorizationFilter.class)
                 .formLogin(form -> form.disable())
                 .httpBasic(basic -> basic.disable())
                 .logout(logout -> logout
