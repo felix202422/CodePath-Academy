@@ -67,6 +67,20 @@ before advancing the continue target, and lesson progress is stored in the exist
 `lesson_progress` table (no schema migration). The frontend lesson reader is lazy-loaded and
 renders imported Markdown through a `rehype-sanitize` pipeline rather than raw HTML.
 
+The Phase 8 assessment APIs split by role. `/api/v1/admin/courses/{id}/assessments` and
+`/api/v1/admin/assessments/**` cover authoring: metadata, publication status, and replace-all
+question sets that are validated as a whole before any write; a question set locks as soon as
+attempt rows exist (delete is blocked, later saves are settings-only), and publishing requires a
+published course plus a published module when one is set, and at least one question.
+`/api/v1/me/assessments/**` requires ROLE_STUDENT: every read and write re-checks the full Phase 7
+access rule (PUBLISHED assessment in a PUBLISHED course and module, APPROVED enrollment), attempts
+start idempotently (start resumes the open attempt), and answers are accepted only inside the
+server-derived time window plus a short submission grace — expired attempts are recorded at zero
+points. Grading runs exclusively on the server against the stored key (`correct_text` for
+short answers is serialized to students only after submission), results expose the student's own
+answers and the correct options for honest review, and answer keys are never present in any
+pre-submission payload. Flyway `V4__phase8_assessments.sql` adds the short-answer key column.
+
 ## Content import and rendering
 
 The importer accepts only the configured CodePath-Masterclass repository or an administrator-selected

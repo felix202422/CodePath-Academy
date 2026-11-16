@@ -53,5 +53,17 @@ All notable changes to CodePath-Academy are documented here. Format follows
   modules/lessons of approved enrollments are exposed, lesson completion is recorded server-side
   against the existing `lesson_progress` table, and the continue target advances with completed
   lessons. Lesson Markdown is rendered through a sanitized GFM renderer.
+- Phase 8 assessments: administrators author assessments on the course detail page (metadata plus
+  multiple-choice, true/false, multi-answer, and short-answer questions with a server-stored answer
+  key), with whole-set validation before any write; question sets lock once attempts exist — delete
+  is blocked and later saves are settings-only unless the set is replaced — and publishing requires
+  a published course, a published module when set, and at least one question (Flyway V4 adds
+  `correct_text`, never sent to students before submission). Enrolled students list published
+  assessments with attempt history (`/api/v1/me/assessments/**`, ROLE_STUDENT), start or resume an
+  attempt idempotently, answer under a countdown derived from the server's start time with a
+  30-second submission grace, and submit through a two-step confirm; grading happens only on the
+  server (`score × 100 ≥ passScorePercent × maxScore`, expired attempts recorded at 0 points), and
+  the result screen shows the score, pass mark, and per-question breakdown of the student's answers
+  against the stored key.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main
