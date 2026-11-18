@@ -6,6 +6,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.function.Supplier;
+import org.springframework.boot.autoconfigure.session.DefaultCookieSerializerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
@@ -122,6 +123,24 @@ public class SecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    /**
+     * Makes {@code app.web.cookie-secure} actually govern the Spring Session
+     * cookie. With the flag off (the default) the serializer is left on Spring
+     * Session's request-based rule, so the cookie is marked Secure whenever the
+     * request arrived over TLS and plain-HTTP local development keeps working.
+     * With the flag on the cookie is always Secure, which is what a
+     * TLS-terminating proxy deployment needs: there the container sees plain
+     * HTTP, so {@code request.isSecure()} alone would silently drop the flag.
+     */
+    @Bean
+    public DefaultCookieSerializerCustomizer sessionCookieSecureFlag(AppProperties properties) {
+        return serializer -> {
+            if (properties.web().cookieSecure()) {
+                serializer.setUseSecureCookie(true);
+            }
+        };
     }
 
     /**
