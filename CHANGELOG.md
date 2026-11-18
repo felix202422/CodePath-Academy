@@ -65,5 +65,17 @@ All notable changes to CodePath-Academy are documented here. Format follows
   server (`score × 100 ≥ passScorePercent × maxScore`, expired attempts recorded at 0 points), and
   the result screen shows the score, pass mark, and per-question breakdown of the student's answers
   against the stored key.
+- Phase 9 administration and analytics: an append-only audit trail written by an
+  `AuditInterceptor` after every successful `/api/v1/admin/**` mutation (normalized action,
+  entity type from the path, failed writes logged and swallowed — never breaking the action),
+  surfaced as an administrator dashboard of live indexed counts plus recent activity, a students
+  screen with the registration review queue (approve/reject with optional notes) and
+  suspend/reactivate account lifecycle (server-side state rules; suspended accounts are refused
+  authenticated access by `AccountStatusFilter` while `/auth/me` still reports honest status),
+  announcements with draft-first authoring where publication only ever moves through the explicit
+  `/status` transition (Flyway V5 adds `course_id`; status is never accepted from a write payload;
+  entering PUBLISHED stamps `publishedAt`), a read-only audit log with entity/limit filters, and a
+  student announcement feed (`/api/v1/me/announcements`) that returns only published platform-wide
+  or approved-course announcements.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

@@ -81,6 +81,24 @@ short answers is serialized to students only after submission), results expose t
 answers and the correct options for honest review, and answer keys are never present in any
 pre-submission payload. Flyway `V4__phase8_assessments.sql` adds the short-answer key column.
 
+The Phase 9 administration surfaces keep every decision on the server. `AccountStatusFilter`
+re-checks account status on authenticated `/me` and `/admin` requests and answers 403 with an
+honest reason for suspended accounts, while `/api/v1/auth/**` stays exempt so `/auth/me` reports
+the real status instead of masking it. `/api/v1/admin/students` lists accounts and exposes only
+the legal lifecycle moves (suspend from ACTIVE, reactivate from SUSPENDED — each 409 otherwise);
+`/api/v1/admin/registrations` owns the PENDING → ACTIVE/REJECTED review with optional notes.
+`AdminDashboardService` returns real indexed counts (queues, account totals, published content)
+plus the most recent audit rows — no computed placeholders. Announcements (Flyway
+`V5__phase5_announcements.sql`, `course_id` null = platform-wide) never accept `status` from a
+write payload: drafts are created as DRAFT and publication moves only through the explicit
+`/status` transition, which stamps `publishedAt` on entry and clears it on exit; the student feed
+at `/api/v1/me/announcements` returns only PUBLISHED rows that are platform-wide or scoped to a
+course where that student has an APPROVED enrollment. The audit trail is written by
+`AuditInterceptor` after each successful `/api/v1/admin/**` mutation (GETs and ≥400 responses are
+skipped, actions are normalized so UUIDs become `{id}`, and a failed audit write is logged and
+swallowed so it can never turn a committed action into an error); rows are append-only and read
+back through `/api/v1/admin/audit` with entityType/limit filters.
+
 ## Content import and rendering
 
 The importer accepts only the configured CodePath-Masterclass repository or an administrator-selected
