@@ -9,6 +9,7 @@ const STUDENT_NAV: NavItem[] = [
   { to: '/student/enrollments', label: 'Enrollments' },
   { to: '/student/learning', label: 'My learning' },
   { to: '/student/assessments', label: 'Assessments' },
+  { to: '/student/announcements', label: 'Announcements' },
   { to: '/student/profile', label: 'Profile' },
 ];
 

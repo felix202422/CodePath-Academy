@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../../App';
 import type { SessionUser } from '../auth/authApi';
+import type { MyAnnouncement } from './announcementsApi';
 import type {
   StudentCourseLearning,
   StudentDashboard,
@@ -109,6 +110,27 @@ const lesson: StudentLesson = {
   }],
 };
 
+const myAnnouncements: MyAnnouncement[] = [
+  {
+    id: 'ann-1',
+    title: 'Platform maintenance window',
+    bodyMarkdown: 'The academy will be **read-only** on Sunday 08:00–10:00 UTC.',
+    audience: 'ALL',
+    courseId: null,
+    courseTitle: null,
+    publishedAt: '2026-11-13T10:00:00Z',
+  },
+  {
+    id: 'ann-2',
+    title: 'New lesson published',
+    bodyMarkdown: 'Lesson 3 of Software Engineering is now available.',
+    audience: 'STUDENTS',
+    courseId: 'course-1',
+    courseTitle: 'Software Engineering',
+    publishedAt: '2026-11-14T09:00:00Z',
+  },
+];
+
 interface RecordedCall {
   path: string;
   method: string;
@@ -157,6 +179,10 @@ function mockLearningApi(session: SessionUser | null, hasEnrollment = true) {
         progressPercent: 0,
         courses: [],
       });
+    }
+    if (url.pathname === '/api/v1/me/announcements') {
+      // Server-side visibility: only published rows this student may see.
+      return jsonResponse(hasEnrollment ? myAnnouncements : []);
     }
     if (url.pathname === `/api/v1/me/learning/courses/${course.courseSlug}`) {
       return hasEnrollment
@@ -294,4 +320,32 @@ describe('student lesson reader', () => {
       `/student/learning/${course.courseSlug}/lessons/lesson-1`,
     );
   }, 30000);
+});
+
+describe('student announcements feed', () => {
+  it('renders only the published announcements the server returned', async () => {
+    const calls = mockLearningApi(studentSession);
+
+    renderApp('/student/announcements');
+
+    expect(await screen.findByRole('heading', { level: 1, name: 'Announcements' }))
+      .toBeInTheDocument();
+    expect(await screen.findByText('Platform maintenance window')).toBeInTheDocument();
+    expect(screen.getByText('New lesson published')).toBeInTheDocument();
+    expect(screen.getByText(/Platform-wide/)).toBeInTheDocument();
+    expect(screen.getByText(/Course update · Software Engineering/)).toBeInTheDocument();
+    expect(screen.getByText('Everyone')).toBeInTheDocument();
+    // Markdown body is sanitized and rendered.
+    expect(screen.getByText('read-only')).toBeInTheDocument();
+    expect(calls).toContainEqual({ path: '/api/v1/me/announcements', method: 'GET' });
+  });
+
+  it('explains the empty state when the feed has nothing published', async () => {
+    mockLearningApi(studentSession, false);
+
+    renderApp('/student/announcements');
+
+    expect(await screen.findByRole('heading', { name: 'No announcements yet' }))
+      .toBeInTheDocument();
+  });
 });

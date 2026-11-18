@@ -15,8 +15,13 @@ import { PlaceholderPage } from './features/shared/PlaceholderPage';
 import { AdminContentPage } from './features/admin/AdminContentPage';
 import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
 import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
+import { AdminDashboardPage } from './features/admin/AdminDashboardPage';
+import { AdminAnnouncementsPage } from './features/admin/AdminAnnouncementsPage';
+import { AdminAuditPage } from './features/admin/AdminAuditPage';
 import { AdminEnrollmentsPage } from './features/admin/AdminEnrollmentsPage';
+import { AdminStudentsPage } from './features/admin/AdminStudentsPage';
 import { MyEnrollmentsPage } from './features/student/MyEnrollmentsPage';
+import { MyAnnouncementsPage } from './features/student/MyAnnouncementsPage';
 import { MyLearningPage } from './features/student/MyLearningPage';
 import { MyAssessmentsPage } from './features/student/MyAssessmentsPage';
 import { TakeAssessmentPage } from './features/student/TakeAssessmentPage';
@@ -73,6 +78,7 @@ export default function App() {
             )}
           />
           <Route path="enrollments" element={<MyEnrollmentsPage />} />
+          <Route path="announcements" element={<MyAnnouncementsPage />} />
           <Route path="assessments" element={<MyAssessmentsPage />} />
           <Route path="assessments/attempts/:attemptId" element={<AssessmentResultPage />} />
           <Route path="assessments/:assessmentId" element={<TakeAssessmentPage />} />
@@ -92,50 +98,14 @@ export default function App() {
 
       <Route element={<RequireRole role="ADMIN" />}>
         <Route path="/admin" element={<AdminLayout />}>
-          <Route
-            index
-            element={
-              <PlaceholderPage
-                title="Administration dashboard"
-                phase="Phase 9 — Administration and analytics"
-                description="Enrollment queue, content status, and platform activity in one place."
-              />
-            }
-          />
-          <Route
-            path="students"
-            element={
-              <PlaceholderPage
-                title="Students"
-                phase="Phase 9 — Administration and analytics"
-                description="Review registration requests, approve or reject students, and manage account status."
-              />
-            }
-          />
+          <Route index element={<AdminDashboardPage />} />
+          <Route path="students" element={<AdminStudentsPage />} />
           <Route path="enrollments" element={<AdminEnrollmentsPage />} />
           <Route path="courses" element={<AdminCoursesPage />} />
           <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
           <Route path="content" element={<AdminContentPage />} />
-          <Route
-            path="announcements"
-            element={
-              <PlaceholderPage
-                title="Announcements"
-                phase="Phase 9 — Administration and analytics"
-                description="Publish platform and course announcements to enrolled students."
-              />
-            }
-          />
-          <Route
-            path="audit"
-            element={
-              <PlaceholderPage
-                title="Audit log"
-                phase="Phase 9 — Administration and analytics"
-                description="Append-only record of administrative actions for review and accountability."
-              />
-            }
-          />
+          <Route path="announcements" element={<AdminAnnouncementsPage />} />
+          <Route path="audit" element={<AdminAuditPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>

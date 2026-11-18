@@ -122,9 +122,9 @@ describe('App routing', () => {
     renderApp('/admin');
 
     expect(
-      await screen.findByRole('heading', { level: 1, name: 'Administration dashboard' }),
+      await screen.findByRole('heading', { level: 1, name: 'Dashboard' }),
     ).toBeInTheDocument();
-    expect(screen.getByText('Administration')).toBeInTheDocument();
+    expect(screen.getAllByText('Administration').length).toBeGreaterThan(0);
     expect(screen.getByRole('link', { name: 'Audit log' })).toBeInTheDocument();
   });
 

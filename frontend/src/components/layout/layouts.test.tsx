@@ -80,6 +80,7 @@ describe('StudentLayout', () => {
     expect(nav).toHaveTextContent('Dashboard');
     expect(nav).toHaveTextContent('My learning');
     expect(nav).toHaveTextContent('Assessments');
+    expect(nav).toHaveTextContent('Announcements');
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
     // The shell has no public footer — students are inside the app.
     expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument();

@@ -5,8 +5,11 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import App from '../../App';
 import type {
+  AdminDashboardResponse,
+  AnnouncementAdminResponse,
   AssessmentAdminResponse,
   AssessmentDetailAdminResponse,
+  AuditEntryResponse,
   CourseAdminResponse,
   ImportRowDetailResponse,
   ImportRowResponse,
@@ -15,6 +18,8 @@ import type {
   LessonDetailAdminResponse,
   ModuleAdminResponse,
   PathAdminResponse,
+  RegistrationRequestResponse,
+  StudentAdminResponse,
 } from './adminApi';
 
 function renderApp(initialPath: string) {
@@ -304,6 +309,124 @@ const importRun: ImportRunResponse = {
   warnings: ['Skipped unknown front-matter field "level".'],
 };
 
+/* Phase 9 administration fixtures: live dashboard counts, the registration
+   queue, student accounts with mixed lifecycle states, announcements across
+   the publication lifecycle, and append-only audit rows. */
+
+const dashboard: AdminDashboardResponse = {
+  pendingRegistrations: 2,
+  pendingEnrollments: 1,
+  activeStudents: 4,
+  suspendedStudents: 1,
+  publishedCourses: 1,
+  publishedPaths: 1,
+  publishedAnnouncements: 1,
+  recentAudit: [],
+};
+
+const activeStudent: StudentAdminResponse = {
+  id: 'stu-active',
+  email: 'ada@example.test',
+  fullName: 'Ada Student',
+  status: 'ACTIVE',
+  interests: 'Java',
+  createdAt: '2026-11-01T09:00:00Z',
+};
+
+const suspendedStudent: StudentAdminResponse = {
+  id: 'stu-suspended',
+  email: 'sid@example.test',
+  fullName: 'Sid Suspended',
+  status: 'SUSPENDED',
+  interests: null,
+  createdAt: '2026-11-02T09:00:00Z',
+};
+
+const students: StudentAdminResponse[] = [activeStudent, suspendedStudent];
+
+const pendingRegistration: RegistrationRequestResponse = {
+  id: 'reg-pending',
+  userId: 'stu-new',
+  email: 'new@example.test',
+  fullName: 'New Student',
+  status: 'PENDING',
+  interests: 'Frontend',
+  createdAt: '2026-11-10T09:00:00Z',
+  reviewNotes: null,
+  reviewedAt: null,
+};
+
+const reviewedRegistration: RegistrationRequestResponse = {
+  id: 'reg-approved',
+  userId: 'stu-done',
+  email: 'done@example.test',
+  fullName: 'Done Student',
+  status: 'APPROVED',
+  interests: null,
+  createdAt: '2026-11-08T09:00:00Z',
+  reviewNotes: 'Welcome aboard.',
+  reviewedAt: '2026-11-09T10:00:00Z',
+};
+
+const registrations: RegistrationRequestResponse[] = [pendingRegistration, reviewedRegistration];
+
+const draftAnnouncement: AnnouncementAdminResponse = {
+  id: 'ann-draft',
+  title: 'Draft notice',
+  bodyMarkdown: 'Still being written.',
+  audience: 'STUDENTS',
+  status: 'DRAFT',
+  courseId: null,
+  courseTitle: null,
+  createdByEmail: 'admin@example.com',
+  publishedAt: null,
+  createdAt: '2026-11-12T09:00:00Z',
+  updatedAt: '2026-11-12T09:00:00Z',
+};
+
+const publishedAnnouncement: AnnouncementAdminResponse = {
+  id: 'ann-published',
+  title: 'Maintenance window',
+  bodyMarkdown: 'The academy will be read-only on Sunday.',
+  audience: 'ALL',
+  status: 'PUBLISHED',
+  courseId: 'c-pub',
+  courseTitle: 'Computer Foundations',
+  createdByEmail: 'admin@example.com',
+  publishedAt: '2026-11-13T10:00:00Z',
+  createdAt: '2026-11-12T11:00:00Z',
+  updatedAt: '2026-11-13T10:00:00Z',
+};
+
+const announcements: AnnouncementAdminResponse[] = [draftAnnouncement, publishedAnnouncement];
+
+const auditEntries: AuditEntryResponse[] = [
+  {
+    id: 'audit-1',
+    action: 'POST /api/v1/admin/students/{id}/suspend',
+    entityType: 'students',
+    entityId: 'stu-suspended',
+    details: 'status=200',
+    ipAddress: '127.0.0.1',
+    actorId: 'a-1',
+    actorEmail: 'admin@example.com',
+    actorName: 'Ada Admin',
+    createdAt: '2026-11-14T12:00:00Z',
+  },
+  {
+    id: 'audit-2',
+    action: 'POST /api/v1/admin/announcements',
+    entityType: 'announcements',
+    entityId: null,
+    details: 'status=201',
+    ipAddress: '127.0.0.1',
+    actorId: 'a-1',
+    actorEmail: 'admin@example.com',
+    actorName: 'Ada Admin',
+    createdAt: '2026-11-14T11:00:00Z',
+  },
+];
+
 interface RecordedCall {
   url: string;
   method: string;
@@ -475,6 +598,98 @@ function mockAdminApi(options: MockOptions = {}) {
       return found?.id === conflictRow.id
         ? jsonResponse(conflictDetail)
         : jsonResponse(notFound(), 404);
+    }
+
+    // Phase 9: administration dashboard, student accounts, registration review.
+    if (path === '/api/v1/admin/dashboard') {
+      return jsonResponse({
+        ...dashboard,
+        recentAudit: auditEntries,
+      });
+    }
+    if (path === '/api/v1/admin/students') {
+      const status = url.searchParams.get('status');
+      return jsonResponse(
+        status ? students.filter((row) => row.status === status) : students,
+      );
+    }
+    const studentAction = match(
+      /^\/api\/v1\/admin\/students\/([^/]+)\/(suspend|reactivate)$/,
+    );
+    if (studentAction && method === 'POST') {
+      const found = students.find((row) => row.id === (studentAction[1] ?? ''));
+      if (!found) return jsonResponse(notFound(), 404);
+      const action = studentAction[2];
+      if (action === 'suspend' && found.status !== 'ACTIVE') {
+        return jsonResponse({ message: 'Only active accounts can be suspended.' }, 409);
+      }
+      if (action === 'reactivate' && found.status !== 'SUSPENDED') {
+        return jsonResponse({ message: 'Only suspended accounts can be reactivated.' }, 409);
+      }
+      return jsonResponse({
+        ...found,
+        status: action === 'suspend' ? 'SUSPENDED' : 'ACTIVE',
+      });
+    }
+    if (path === '/api/v1/admin/registrations') {
+      const status = url.searchParams.get('status');
+      return jsonResponse(
+        status ? registrations.filter((row) => row.status === status) : registrations,
+      );
+    }
+    const registrationReview = match(
+      /^\/api\/v1\/admin\/registrations\/([^/]+)\/(approve|reject)$/,
+    );
+    if (registrationReview && method === 'POST') {
+      const found = registrations.find((row) => row.id === (registrationReview[1] ?? ''));
+      if (!found) return jsonResponse(notFound(), 404);
+      const decision = registrationReview[2];
+      return jsonResponse({
+        ...found,
+        status: decision === 'approve' ? 'APPROVED' : 'REJECTED',
+        reviewNotes: typeof body?.notes === 'string' ? body.notes : null,
+        reviewedAt: '2026-11-15T10:00:00Z',
+      });
+    }
+
+    // Phase 9: announcements (status only ever moves through /status).
+    if (path === '/api/v1/admin/announcements') {
+      if (method === 'POST') {
+        return jsonResponse(
+          { ...draftAnnouncement, ...body, id: 'ann-new', courseId: body?.courseId ?? null },
+          201,
+        );
+      }
+      const status = url.searchParams.get('status');
+      return jsonResponse(
+        status ? announcements.filter((row) => row.status === status) : announcements,
+      );
+    }
+    const announcementStatus = match(
+      /^\/api\/v1\/admin\/announcements\/([^/]+)\/status$/,
+    );
+    if (announcementStatus && method === 'POST') {
+      const found = announcements.find((row) => row.id === (announcementStatus[1] ?? ''));
+      if (!found) return jsonResponse(notFound(), 404);
+      const status = body?.status;
+      return jsonResponse({
+        ...found,
+        status,
+        publishedAt: status === 'PUBLISHED' ? '2026-11-15T11:00:00Z' : null,
+      });
+    }
+    const announcementPut = match(/^\/api\/v1\/admin\/announcements\/([^/]+)$/);
+    if (announcementPut && method === 'PUT') {
+      const found = announcements.find((row) => row.id === (announcementPut[1] ?? ''));
+      return found ? jsonResponse({ ...found, ...body }) : jsonResponse(notFound(), 404);
+    }
+
+    // Phase 9: append-only audit trail.
+    if (path === '/api/v1/admin/audit') {
+      const entityType = url.searchParams.get('entityType');
+      return jsonResponse(
+        entityType ? auditEntries.filter((row) => row.entityType === entityType) : auditEntries,
+      );
     }
 
     return jsonResponse({ message: 'Not found' }, 404);
@@ -908,4 +1123,196 @@ describe('AssessmentsSection', () => {
     });
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
   }, 30000);
+});
+
+describe('AdminDashboardPage', () => {
+  it('renders live queue/account counts and recent audit activity', async () => {
+    mockAdminApi();
+
+    renderApp('/admin');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Dashboard' }),
+    ).toBeInTheDocument();
+
+    // Every number comes from the dashboard endpoint — no placeholder values.
+    const pendingRegistrations = await screen.findByRole('link', {
+      name: /Pending registrations/,
+    });
+    expect(pendingRegistrations).toHaveTextContent('Pending registrations');
+    expect(pendingRegistrations).toHaveTextContent('2');
+    expect(screen.getByRole('link', { name: /Pending enrollments/ })).toHaveTextContent('1');
+    expect(screen.getByRole('link', { name: /Active students/ })).toHaveTextContent('4');
+    expect(screen.getByRole('link', { name: /Suspended students/ })).toHaveTextContent('1');
+    expect(screen.getByRole('link', { name: /Published courses/ })).toHaveTextContent('1');
+    expect(screen.getByRole('link', { name: /Published announcements/ })).toHaveTextContent('1');
+
+    // Recent activity lists the audit rows the endpoint returned.
+    expect(
+      await screen.findByText('POST /api/v1/admin/students/{id}/suspend'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('admin@example.com')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'View full audit log' })).toBeInTheDocument();
+  });
+});
+
+describe('AdminStudentsPage', () => {
+  it('approves a registration with the reviewer note the admin typed', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/students');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Students' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('New Student')).toBeInTheDocument();
+    expect(screen.getByText('new@example.test')).toBeInTheDocument();
+
+    // The reviewed request is not in the default PENDING filter.
+    expect(screen.queryByText('Done Student')).not.toBeInTheDocument();
+
+    const note = screen.getByLabelText(/^Review note for New Student/);
+    await user.type(note, 'Verified via waitlist.');
+
+    await user.click(screen.getByRole('button', { name: 'Approve' }));
+
+    await waitFor(() => {
+      const post = calls.find(
+        (call) =>
+          call.method === 'POST' &&
+          call.url === '/api/v1/admin/registrations/reg-pending/approve',
+      );
+      expect(post).toBeDefined();
+      expect(post?.body).toEqual({ notes: 'Verified via waitlist.' });
+    });
+  }, 30000);
+
+  it('suspends an active account and reactivates a suspended one', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/students');
+
+    const suspendRow = (await screen.findByText('Ada Student')).closest('tr');
+    expect(suspendRow).not.toBeNull();
+    const reactivateRow = (await screen.findByText('Sid Suspended')).closest('tr');
+    expect(reactivateRow).not.toBeNull();
+
+    // Only legal transitions are offered: active → suspend, suspended → reactivate.
+    await user.click(within(suspendRow as HTMLElement).getByRole('button', { name: 'Suspend' }));
+    await waitFor(() => {
+      expect(
+        calls.some(
+          (call) =>
+            call.method === 'POST' &&
+            call.url === '/api/v1/admin/students/stu-active/suspend',
+        ),
+      ).toBe(true);
+    });
+
+    await user.click(
+      within(reactivateRow as HTMLElement).getByRole('button', { name: 'Reactivate' }),
+    );
+    await waitFor(() => {
+      expect(
+        calls.some(
+          (call) =>
+            call.method === 'POST' &&
+            call.url === '/api/v1/admin/students/stu-suspended/reactivate',
+        ),
+      ).toBe(true);
+    });
+
+    // Neither action invents a request body — the server resolves the actor.
+    const suspendCall = calls.find(
+      (call) => call.method === 'POST' && call.url.endsWith('/stu-active/suspend'),
+    );
+    expect(suspendCall?.body).toBeUndefined();
+  }, 30000);
+});
+
+describe('AdminAnnouncementsPage', () => {
+  it('creates an announcement without ever sending a status', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/announcements');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Announcements' }),
+    ).toBeInTheDocument();
+    expect(await screen.findByText('Draft notice')).toBeInTheDocument();
+    expect(screen.getByText('Maintenance window')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'New announcement' }));
+    const dialog = await screen.findByRole('dialog', { name: 'New announcement' });
+
+    await user.type(within(dialog).getByLabelText(/^Title/), 'Schedule change');
+    await user.type(
+      within(dialog).getByLabelText(/^Body/),
+      'Week 4 workshops move to Friday.',
+    );
+    await user.click(within(dialog).getByRole('button', { name: 'Create announcement' }));
+
+    await waitFor(() => {
+      const post = calls.find(
+        (call) => call.method === 'POST' && call.url === '/api/v1/admin/announcements',
+      );
+      expect(post).toBeDefined();
+      // Status is never part of a write payload — publication is /status only.
+      expect(post?.body).not.toHaveProperty('status');
+      expect(post?.body).toEqual({
+        title: 'Schedule change',
+        bodyMarkdown: 'Week 4 workshops move to Friday.',
+        audience: 'STUDENTS',
+        courseId: null,
+      });
+    });
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  }, 30000);
+
+  it('publishes a draft through the explicit status transition', async () => {
+    const calls = mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/announcements');
+
+    const draftCard = (await screen.findByText('Draft notice')).closest('li') as HTMLElement;
+    await user.click(within(draftCard).getByRole('button', { name: 'Publish' }));
+
+    await waitFor(() => {
+      const post = calls.find(
+        (call) =>
+          call.method === 'POST' &&
+          call.url === '/api/v1/admin/announcements/ann-draft/status',
+      );
+      expect(post).toBeDefined();
+      expect(post?.body).toEqual({ status: 'PUBLISHED' });
+    });
+  }, 30000);
+});
+
+describe('AdminAuditPage', () => {
+  it('lists audit rows newest-first and narrows them by surface', async () => {
+    mockAdminApi();
+    const user = userEvent.setup();
+
+    renderApp('/admin/audit');
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'Audit log' }),
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByText('POST /api/v1/admin/students/{id}/suspend'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('POST /api/v1/admin/announcements')).toBeInTheDocument();
+    expect(screen.getAllByText('Ada Admin')).toHaveLength(2);
+
+    await user.selectOptions(screen.getByLabelText('Filter by surface'), 'students');
+
+    expect(await screen.findByText('POST /api/v1/admin/students/{id}/suspend')).toBeInTheDocument();
+    expect(screen.queryByText('POST /api/v1/admin/announcements')).not.toBeInTheDocument();
+    expect(screen.getByText('stu-suspended')).toBeInTheDocument();
+  });
 });

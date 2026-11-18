@@ -273,6 +273,92 @@ export interface AssessmentWriteRequest {
   questions?: AssessmentQuestionWriteRequest[] | null;
 }
 
+/* ------------------------------------------ administration (Phase 9) */
+
+/** Account lifecycle as administrators manage it. */
+export type UserStatus = 'PENDING' | 'ACTIVE' | 'REJECTED' | 'SUSPENDED';
+
+/** Review state of a registration request in the queue. */
+export type RegistrationStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+/** Authoring intent for an announcement's audience. */
+export type AnnouncementAudience = 'STUDENTS' | 'ALL';
+
+/** Live administrator home-screen aggregates; every number is a real count. */
+export interface AdminDashboardResponse {
+  pendingRegistrations: number;
+  pendingEnrollments: number;
+  activeStudents: number;
+  suspendedStudents: number;
+  publishedCourses: number;
+  publishedPaths: number;
+  publishedAnnouncements: number;
+  recentAudit: AuditEntryResponse[];
+}
+
+/** Administrator view of one student account. */
+export interface StudentAdminResponse {
+  id: string;
+  email: string;
+  fullName: string;
+  status: UserStatus;
+  interests: string | null;
+  createdAt: string;
+}
+
+/** One registration request including the applicant's account. */
+export interface RegistrationRequestResponse {
+  id: string;
+  userId: string;
+  email: string;
+  fullName: string;
+  status: RegistrationStatus;
+  interests: string | null;
+  createdAt: string;
+  reviewNotes: string | null;
+  reviewedAt: string | null;
+}
+
+/** Administrator view of one announcement, drafts and archives included. */
+export interface AnnouncementAdminResponse {
+  id: string;
+  title: string;
+  bodyMarkdown: string;
+  audience: AnnouncementAudience;
+  status: ContentStatus;
+  courseId: string | null;
+  courseTitle: string | null;
+  createdByEmail: string | null;
+  publishedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/**
+ * Create/update payload. `courseId` null means platform-wide. Status is
+ * deliberately absent — publication only ever happens through /status.
+ */
+export interface AnnouncementWriteRequest {
+  title: string;
+  bodyMarkdown: string;
+  audience: AnnouncementAudience;
+  courseId?: string | null;
+}
+
+/** One append-only audit-trail row. */
+export interface AuditEntryResponse {
+  id: string;
+  action: string;
+  entityType: string;
+  entityId: string | null;
+  details: string | null;
+  ipAddress: string | null;
+  actorId: string | null;
+  actorEmail: string | null;
+  actorName: string | null;
+  createdAt: string;
+}
+
 /**
  * Query keys. The `*` roots (paths, courses, course, module, lesson, imports)
  * exist only as invalidation prefixes — individual queries always use the
@@ -280,6 +366,13 @@ export interface AssessmentWriteRequest {
  */
 export const adminQueryKeys = {
   paths: () => ['admin', 'paths'] as const,
+  dashboard: () => ['admin', 'dashboard'] as const,
+  students: (status?: UserStatus) => ['admin', 'students', status ?? 'all'] as const,
+  registrations: (status?: RegistrationStatus) =>
+    ['admin', 'registrations', status ?? 'all'] as const,
+  announcements: (status?: ContentStatus) =>
+    ['admin', 'announcements', status ?? 'all'] as const,
+  audit: (entityType?: string) => ['admin', 'audit', entityType ?? 'all'] as const,
   courses: (pathId?: string) => ['admin', 'courses', pathId ?? 'all'] as const,
   course: (courseId: string) => ['admin', 'course', courseId] as const,
   module: (moduleId: string) => ['admin', 'module', moduleId] as const,
@@ -843,6 +936,204 @@ export function useDiscardImport() {
     mutationFn: discardImport,
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: ADMIN_KEY });
+    },
+  });
+}
+
+/* ------------------------------------- administration (Phase 9) queries */
+
+export function getAdminDashboard(): Promise<AdminDashboardResponse> {
+  return apiFetch<AdminDashboardResponse>('/api/v1/admin/dashboard');
+}
+
+export function listStudents(status?: UserStatus): Promise<StudentAdminResponse[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return apiFetch<StudentAdminResponse[]>(`/api/v1/admin/students${query}`);
+}
+
+export function suspendStudent(id: string): Promise<StudentAdminResponse> {
+  return apiFetch<StudentAdminResponse>(
+    `/api/v1/admin/students/${encodeURIComponent(id)}/suspend`,
+    { method: 'POST' },
+  );
+}
+
+export function reactivateStudent(id: string): Promise<StudentAdminResponse> {
+  return apiFetch<StudentAdminResponse>(
+    `/api/v1/admin/students/${encodeURIComponent(id)}/reactivate`,
+    { method: 'POST' },
+  );
+}
+
+export function listRegistrations(
+  status?: RegistrationStatus,
+): Promise<RegistrationRequestResponse[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return apiFetch<RegistrationRequestResponse[]>(`/api/v1/admin/registrations${query}`);
+}
+
+export function reviewRegistration(
+  id: string,
+  decision: 'approve' | 'reject',
+  notes: string,
+): Promise<RegistrationRequestResponse> {
+  return apiFetch<RegistrationRequestResponse>(
+    `/api/v1/admin/registrations/${encodeURIComponent(id)}/${decision}`,
+    { method: 'POST', body: { notes } },
+  );
+}
+
+export function listAnnouncements(status?: ContentStatus): Promise<AnnouncementAdminResponse[]> {
+  const query = status ? `?status=${encodeURIComponent(status)}` : '';
+  return apiFetch<AnnouncementAdminResponse[]>(`/api/v1/admin/announcements${query}`);
+}
+
+export function createAnnouncement(
+  body: AnnouncementWriteRequest,
+): Promise<AnnouncementAdminResponse> {
+  return apiFetch<AnnouncementAdminResponse>('/api/v1/admin/announcements', {
+    method: 'POST',
+    body,
+  });
+}
+
+export function updateAnnouncement(
+  id: string,
+  body: AnnouncementWriteRequest,
+): Promise<AnnouncementAdminResponse> {
+  return apiFetch<AnnouncementAdminResponse>(
+    `/api/v1/admin/announcements/${encodeURIComponent(id)}`,
+    { method: 'PUT', body },
+  );
+}
+
+/** The only publication path: drafts and archives never take status from a payload. */
+export function setAnnouncementStatus(
+  id: string,
+  status: ContentStatus,
+): Promise<AnnouncementAdminResponse> {
+  return apiFetch<AnnouncementAdminResponse>(
+    `/api/v1/admin/announcements/${encodeURIComponent(id)}/status`,
+    { method: 'POST', body: { status } },
+  );
+}
+
+export function listAudit(
+  entityType?: string,
+  limit = 50,
+): Promise<AuditEntryResponse[]> {
+  const params = new URLSearchParams();
+  if (entityType) params.set('entityType', entityType);
+  params.set('limit', String(limit));
+  return apiFetch<AuditEntryResponse[]>(`/api/v1/admin/audit?${params.toString()}`);
+}
+
+export function useAdminDashboard() {
+  return useQuery({ queryKey: adminQueryKeys.dashboard(), queryFn: getAdminDashboard });
+}
+
+export function useAdminStudents(status?: UserStatus) {
+  return useQuery({
+    queryKey: adminQueryKeys.students(status),
+    queryFn: () => listStudents(status),
+  });
+}
+
+export function useAdminRegistrations(status?: RegistrationStatus) {
+  return useQuery({
+    queryKey: adminQueryKeys.registrations(status),
+    queryFn: () => listRegistrations(status),
+  });
+}
+
+export function useAdminAnnouncements(status?: ContentStatus) {
+  return useQuery({
+    queryKey: adminQueryKeys.announcements(status),
+    queryFn: () => listAnnouncements(status),
+  });
+}
+
+export function useAuditLog(entityType?: string, limit = 50) {
+  return useQuery({
+    queryKey: [...adminQueryKeys.audit(entityType), limit],
+    queryFn: () => listAudit(entityType, limit),
+  });
+}
+
+/* ---------------------------------- administration (Phase 9) mutations */
+
+/** Suspends/reactivates also refresh the dashboard counts they move. */
+function useAccountMutation(mutationFn: (id: string) => Promise<StudentAdminResponse>) {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'students'] });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
+    },
+  });
+}
+
+export function useSuspendStudent() {
+  return useAccountMutation(suspendStudent);
+}
+
+export function useReactivateStudent() {
+  return useAccountMutation(reactivateStudent);
+}
+
+export function useReviewRegistration() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      id,
+      decision,
+      notes,
+    }: {
+      id: string;
+      decision: 'approve' | 'reject';
+      notes: string;
+    }) => reviewRegistration(id, decision, notes),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'registrations'] });
+      // Approving creates an ACTIVE account, so the student list moves too.
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'students'] });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
+    },
+  });
+}
+
+export function useCreateAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: createAnnouncement,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
+    },
+  });
+}
+
+export function useUpdateAnnouncement() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, body }: { id: string; body: AnnouncementWriteRequest }) =>
+      updateAnnouncement(id, body),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
+    },
+  });
+}
+
+export function useSetAnnouncementStatus() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: ContentStatus }) =>
+      setAnnouncementStatus(id, status),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'announcements'] });
+      void queryClient.invalidateQueries({ queryKey: adminQueryKeys.dashboard() });
     },
   });
 }
