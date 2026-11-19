@@ -77,5 +77,18 @@ All notable changes to CodePath-Academy are documented here. Format follows
   entering PUBLISHED stamps `publishedAt`), a read-only audit log with entity/limit filters, and a
   student announcement feed (`/api/v1/me/announcements`) that returns only published platform-wide
   or approved-course announcements.
+- Phase 10 quality assurance: an end-to-end journey test covering registration → approval →
+  bottom-up content authoring/publishing → enrollment → lesson progress → server-graded attempt,
+  asserting dashboard deltas and audit rows for every administrative step; a security-hardening
+  suite pinning CSP/frame/nosniff headers on success and error responses, HSTS only on secure
+  requests, a CORS origin allow-list (foreign origins refused with 403), session-cookie flags
+  (HttpOnly, SameSite=Lax, no JSESSIONID), BCrypt-at-rest with no secret material in any API
+  view, an authorization sweep of every admin and personal endpoint, and an actuator surface
+  limited to health/info; `app.web.cookie-secure` is now live through a
+  `DefaultCookieSerializerCustomizer` so deployments behind a TLS-terminating proxy can force the
+  `Secure` flag; frontend responsive/accessibility contracts (shared mobile-nav disclosure with
+  `aria-expanded`/`aria-controls`, Modal focus trap and focus restoration, reduced-motion-aware
+  ScrollReveal, horizontally scrollable admin tables with scoped column headers); and a CI
+  dependency-audit gate (`npm audit --audit-level=critical`) closing CPA-003.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

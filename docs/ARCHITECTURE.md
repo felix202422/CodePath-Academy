@@ -99,6 +99,22 @@ skipped, actions are normalized so UUIDs become `{id}`, and a failed audit write
 swallowed so it can never turn a committed action into an error); rows are append-only and read
 back through `/api/v1/admin/audit` with entityType/limit filters.
 
+Phase 10 pinned the cross-cutting security behavior with tests. Response headers (CSP with
+`frame-ancestors 'none'`, `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`) are asserted
+on success and error responses alike; HSTS is emitted only for secure requests, so plain-HTTP
+local development carries no header while TLS deployments do. CORS is an explicit origin
+allow-list: the configured origins are echoed with credentialed access, and any other `Origin`
+receives 403 with no CORS headers. The session cookie is `HttpOnly`, `SameSite=Lax`, and never
+serialized as `JSESSIONID`; the `app.web.cookie-secure` property is wired into Spring Session via
+a `DefaultCookieSerializerCustomizer` bean in `SecurityConfig` — `true` forces the `Secure` flag
+(needed behind a TLS-terminating proxy where the container itself sees plain HTTP) and `false`
+leaves Spring Session's request-based TLS detection untouched. Passwords remain BCrypt-hashed at
+rest and no API view ever serializes a hash or a plaintext secret; actuator exposes only
+`health`/`info`. `EndToEndWorkflowTest` exercises the whole journey — registration → approval →
+authoring with the bottom-up publish cascade → enrollment → progress → server-graded attempt —
+asserting dashboard count deltas and audit-trail rows rather than absolute totals, so the test
+stays valid as real data accumulates.
+
 ## Content import and rendering
 
 The importer accepts only the configured CodePath-Masterclass repository or an administrator-selected
