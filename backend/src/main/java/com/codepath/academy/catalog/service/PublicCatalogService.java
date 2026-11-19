@@ -5,6 +5,7 @@ import com.codepath.academy.catalog.api.dto.CourseSummaryResponse;
 import com.codepath.academy.catalog.api.dto.OverviewResponse;
 import com.codepath.academy.catalog.api.dto.PathDetailResponse;
 import com.codepath.academy.catalog.api.dto.PathSummaryResponse;
+import com.codepath.academy.catalog.api.dto.SitemapEntry;
 import com.codepath.academy.catalog.model.ContentStatus;
 import com.codepath.academy.catalog.model.Course;
 import com.codepath.academy.catalog.model.LearningPath;
@@ -13,6 +14,7 @@ import com.codepath.academy.catalog.repository.LearningPathRepository;
 import com.codepath.academy.common.error.ApiException;
 import com.codepath.academy.enrollment.model.EnrollmentStatus;
 import com.codepath.academy.enrollment.repository.CourseEnrollmentRepository;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -129,6 +131,26 @@ public class PublicCatalogService {
                 courseRepository.countPublishedModules(course.getId()),
                 courseRepository.countPublishedLessons(course.getId()),
                 prerequisites);
+    }
+
+    /**
+     * Sitemap entries for published catalog pages, using the exact visibility
+     * rules of the public API: published paths, and published courses only when
+     * their owning path is published. Drafts and orphans produce no entry.
+     */
+    @Transactional(readOnly = true)
+    public List<SitemapEntry> getPublicSitemapEntries() {
+        Map<UUID, LearningPath> publishedPaths = publishedPathIndex();
+        List<SitemapEntry> entries = new ArrayList<>();
+        publishedPaths.values().stream()
+                .sorted(Comparator.comparingInt(LearningPath::getDisplayOrder))
+                .forEach(path -> entries.add(
+                        new SitemapEntry("/paths/" + path.getSlug(), path.getUpdatedAt())));
+        courseRepository.findByStatusOrderByDisplayOrderAsc(ContentStatus.PUBLISHED).stream()
+                .filter(course -> publishedPaths.containsKey(course.getLearningPathId()))
+                .forEach(course -> entries.add(
+                        new SitemapEntry("/courses/" + course.getSlug(), course.getUpdatedAt())));
+        return entries;
     }
 
     private Map<UUID, LearningPath> publishedPathIndex() {

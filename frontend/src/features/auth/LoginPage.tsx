@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Link, Navigate, useLocation, useNavigate } from 'react-router';
 import { z } from 'zod';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -37,6 +38,7 @@ function getReturnPath(state: unknown, role: SessionUser['role']): string | null
 
 /** Public sign-in form backed by the server session; roles are taken only from the response. */
 export function LoginPage() {
+  usePageMeta({ title: 'Sign In', noindex: true });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const location = useLocation();

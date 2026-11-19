@@ -1,5 +1,6 @@
 import { BookOpen } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { EmptyState } from '../../components/ui/EmptyState';
@@ -9,6 +10,7 @@ import { useLearningDashboard } from './useLearning';
 
 /** All approved courses for the current student. */
 export function MyLearningPage() {
+  usePageMeta({ title: 'My Learning', noindex: true });
   const dashboard = useLearningDashboard();
 
   if (dashboard.isPending) return <SpinnerCentered label="Loading your courses…" />;

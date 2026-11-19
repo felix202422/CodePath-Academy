@@ -1,5 +1,6 @@
 import { ArrowLeft, Check, X } from 'lucide-react';
 import { Link, useParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -39,6 +40,7 @@ function correctAnswer(question: QuestionResult): string {
  * is computed in the browser.
  */
 export function AssessmentResultPage() {
+  usePageMeta({ title: 'Assessment Result', noindex: true });
   const { attemptId = '' } = useParams();
   const result = useAttemptResult(attemptId);
 

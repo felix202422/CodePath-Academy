@@ -1,5 +1,6 @@
 import { History, Search } from 'lucide-react';
 import { useState } from 'react';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Badge } from '../../components/ui/Badge';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { Select } from '../../components/ui/Field';
@@ -37,6 +38,7 @@ const LIMIT_OPTIONS = [
  * through this screen — it only reads and filters.
  */
 export function AdminAuditPage() {
+  usePageMeta({ title: 'Audit Log', noindex: true });
   const [entityType, setEntityType] = useState('');
   const [limit, setLimit] = useState(50);
   const audit = useAuditLog(entityType || undefined, limit);

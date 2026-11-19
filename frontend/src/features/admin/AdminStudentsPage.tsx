@@ -1,5 +1,6 @@
 import { Check, PauseCircle, PlayCircle, UserCheck, Users, X } from 'lucide-react';
 import { useState } from 'react';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -179,6 +180,7 @@ function AccountRow({
  * the server; this screen only surfaces the actions each state allows.
  */
 export function AdminStudentsPage() {
+  usePageMeta({ title: 'Students', noindex: true });
   const [registrationFilter, setRegistrationFilter] = useState<RegistrationStatus>('PENDING');
   const [accountFilter, setAccountFilter] = useState<UserStatus | ''>('');
   const registrations = useAdminRegistrations(registrationFilter);

@@ -1,5 +1,6 @@
 import { Construction } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 
@@ -15,6 +16,7 @@ export interface PlaceholderPageProps {
  * exactly which phase delivers it instead of showing fake data.
  */
 export function PlaceholderPage({ title, phase, description }: PlaceholderPageProps) {
+  usePageMeta({ title, noindex: true });
   return (
     <div className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <div className="flex items-center gap-3">

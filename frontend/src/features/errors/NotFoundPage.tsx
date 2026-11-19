@@ -1,7 +1,9 @@
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Button } from '../../components/ui/Button';
 
 export function NotFoundPage() {
+  usePageMeta({ title: 'Page Not Found', noindex: true });
   return (
     <div className="mx-auto flex max-w-3xl flex-col items-center px-4 py-24 text-center sm:px-6">
       <p className="text-sm font-semibold tracking-wide text-accent-600 uppercase">Error 404</p>

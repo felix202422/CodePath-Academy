@@ -1,7 +1,13 @@
+import { usePageMeta } from '../../lib/pageMeta';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
 
 /** About page: factual project information only — no unverified claims. */
 export function AboutPage() {
+  usePageMeta({
+    title: 'About the Academy',
+    description:
+      'How CodePath-Academy works: administrator-approved registration and enrollment, structured courses, lessons, assessments, and progress tracking.',
+  });
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="text-3xl font-bold text-navy-950">About CodePath Academy</h1>

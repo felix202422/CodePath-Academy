@@ -48,6 +48,10 @@ app:
     local-checkout-path: ${APP_CURRICULUM_LOCAL_PATH:}
   media:
     root: ${APP_MEDIA_ROOT:./data/media}
+  seo:
+    # Absolute origin for sitemap/robots URLs (https://example.org). Empty in
+    # development: the origin is derived from the incoming request instead.
+    public-base-url: ${APP_PUBLIC_BASE_URL:}
 
 springdoc:
   api-docs:

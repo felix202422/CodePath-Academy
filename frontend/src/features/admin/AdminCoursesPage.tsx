@@ -1,6 +1,7 @@
 import { BookOpen, Plus, Route } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -35,6 +36,7 @@ interface CourseModalState {
  * path-filtered course list with its own create/edit/status actions.
  */
 export function AdminCoursesPage() {
+  usePageMeta({ title: 'Courses', noindex: true });
   const paths = useAdminPaths();
   const [pathFilter, setPathFilter] = useState('');
   const courses = useAdminCourses(pathFilter || undefined);

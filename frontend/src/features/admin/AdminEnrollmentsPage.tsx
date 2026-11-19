@@ -1,6 +1,7 @@
 import { Check, ClipboardList, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -42,6 +43,7 @@ function formatDate(value: string) {
 
 /** Administrator queue/history for explicit, auditable course access decisions. */
 export function AdminEnrollmentsPage() {
+  usePageMeta({ title: 'Enrollments', noindex: true });
   const [filter, setFilter] = useState<EnrollmentFilter>('PENDING');
   const [notes, setNotes] = useState<Record<string, string>>({});
   const status = filter === 'ALL' ? undefined : filter;

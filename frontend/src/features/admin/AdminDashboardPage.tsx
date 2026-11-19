@@ -9,6 +9,7 @@ import {
   UserX,
 } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Card } from '../../components/ui/Card';
 import { AdminQueryState } from './AdminQueryState';
 import { useAdminDashboard, type AdminDashboardResponse } from './adminApi';
@@ -82,6 +83,7 @@ function AuditList({ entries }: { entries: AdminDashboardResponse['recentAudit']
 
 /** Administrator home: live queue/account/content counts plus recent activity. */
 export function AdminDashboardPage() {
+  usePageMeta({ title: 'Admin Dashboard', noindex: true });
   const dashboard = useAdminDashboard();
 
   return (

@@ -1,6 +1,7 @@
 import { AlertCircle, ArrowLeft } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -29,6 +30,7 @@ function formatClock(totalSeconds: number): string {
  * sends everything for server-side grading before navigating to the result.
  */
 export function TakeAssessmentPage() {
+  usePageMeta({ title: 'Assessment', noindex: true });
   const { assessmentId = '' } = useParams();
   const navigate = useNavigate();
   const start = useStartAttempt();

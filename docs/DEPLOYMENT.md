@@ -40,6 +40,8 @@ All configuration is environment variables (names in `.env.example`; values neve
 | `APP_BOOTSTRAP_ADMIN_ENABLED` / `_EMAIL` / `_PASSWORD` | One-time first-administrator provisioning; disable after use |
 | `APP_CURRICULUM_REPOSITORY`, `APP_CURRICULUM_COMMIT`, `APP_CURRICULUM_LOCAL_PATH` | Source-aware importer pinning |
 | `APP_MEDIA_ROOT` | Media storage directory (production: persistent volume) |
+| `APP_PUBLIC_BASE_URL` | Absolute origin for the crawler files (`/sitemap.xml`, `/robots.txt`); set to the real deployed origin in production so sitemap URLs never depend on proxy headers |
+| `VITE_SITE_URL` | Build-time origin baked into `index.html` canonical/Open Graph/Twitter tags (public by design — never put secrets in `VITE_` variables); empty keeps them origin-relative |
 
 Production checklist:
 
@@ -49,6 +51,8 @@ Production checklist:
 4. Apply Flyway migrations as a release step (startup runs them, but releases should gate on them).
 5. Keep `/actuator/` unreachable from the public internet (Nginx already restricts it; repeat
    at the edge).
+6. Set `APP_PUBLIC_BASE_URL` (backend) and `VITE_SITE_URL` (frontend build) to the same real
+   origin so sitemap URLs and social preview tags are absolute.
 
 ## Running the stack
 

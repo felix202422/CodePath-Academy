@@ -3,6 +3,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import { z } from 'zod';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -29,6 +30,11 @@ type RegistrationValues = z.infer<typeof registrationSchema>;
 
 /** Self-registration always submits a student request; status and role are never client fields. */
 export function RegisterPage() {
+  usePageMeta({
+    title: 'Student Registration',
+    description:
+      'Create a student account on CodePath-Academy. Registrations are reviewed by an administrator before an account is activated.',
+  });
   const form = useForm<RegistrationValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', interests: '' },

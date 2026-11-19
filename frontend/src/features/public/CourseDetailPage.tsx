@@ -1,6 +1,7 @@
 import { ArrowLeft, BookOpen, GraduationCap } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card, CardTitle } from '../../components/ui/Card';
@@ -31,6 +32,18 @@ export function CourseDetailPage() {
     session.data?.role === 'STUDENT' && session.data.status === 'ACTIVE';
   const enrollment = useMyCourseEnrollment(course.data?.id ?? '', isActiveStudent);
   const request = useRequestEnrollment();
+
+  // Dynamic course metadata (title/summary come straight from the catalog row).
+  // A real 404 renders inline in this SPA, so it must not be indexed as a page.
+  const courseMissing =
+    course.isError &&
+    course.error instanceof ApiRequestError &&
+    course.error.status === 404;
+  usePageMeta({
+    title: course.data?.title ?? 'Course details',
+    description: course.data?.summary ?? undefined,
+    noindex: courseMissing,
+  });
 
   if (course.isPending) {
     return (

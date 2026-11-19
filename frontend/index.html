@@ -7,6 +7,52 @@
       name="description"
       content="CodePath-Academy — structured technology courses, practical exercises, assessments, and real-world projects."
     />
+    <meta name="robots" content="index, follow" />
+    <!--
+      %VITE_SITE_URL% resolves at build time (see .env.example): empty keeps the
+      URLs origin-relative in development; production builds set
+      VITE_SITE_URL=https://the-real-origin so social scrapers get absolute
+      URLs. The canonical token is deliberately slash-less: an unset value
+      becomes href="", a valid self-reference Vite's asset step skips, whereas
+      href="/" would make Vite try to bundle the public directory itself. At
+      runtime pageMeta.ts rewrites these tags to absolute values for
+      JavaScript-capable crawlers.
+    -->
+    <link rel="canonical" href="%VITE_SITE_URL%" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CodePath-Academy" />
+    <meta property="og:title" content="CodePath-Academy — Learn. Build. Innovate. Become." />
+    <meta
+      property="og:description"
+      content="Structured technology courses with practical lessons, assessments, and real-world projects. Browse published learning paths and courses."
+    />
+    <meta property="og:url" content="%VITE_SITE_URL%/" />
+    <meta property="og:image" content="%VITE_SITE_URL%/images/og/codepath-academy-og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="CodePath-Academy — Learn. Build. Innovate. Become."
+    />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CodePath-Academy — Learn. Build. Innovate. Become." />
+    <meta
+      name="twitter:description"
+      content="Structured technology courses with practical lessons, assessments, and real-world projects."
+    />
+    <meta name="twitter:image" content="%VITE_SITE_URL%/images/og/codepath-academy-og.png" />
+
+    <meta name="theme-color" content="#17163f" />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />
+    <link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
     <title>CodePath-Academy</title>
   </head>
   <body>

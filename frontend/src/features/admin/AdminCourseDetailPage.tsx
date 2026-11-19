@@ -1,6 +1,7 @@
 import { ArrowLeft, Layers, Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Link, useParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -37,6 +38,7 @@ interface LessonModalState {
  * status controls at every level, plus lazy lesson lists and lesson editing.
  */
 export function AdminCourseDetailPage() {
+  usePageMeta({ title: 'Manage Course', noindex: true });
   const { courseId = '' } = useParams();
   const detail = useAdminCourseDetail(courseId);
   const courseStatus = useSetCourseStatus();

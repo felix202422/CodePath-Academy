@@ -1,5 +1,6 @@
 import { ClipboardList, Play, RotateCcw } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -14,6 +15,7 @@ import { useMyAssessments } from './useAssessments';
  * visibility and grading are decided by the backend.
  */
 export function MyAssessmentsPage() {
+  usePageMeta({ title: 'My Assessments', noindex: true });
   const assessments = useMyAssessments();
   const navigate = useNavigate();
 

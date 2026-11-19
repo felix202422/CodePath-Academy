@@ -8,6 +8,7 @@ import {
   UserCheck,
 } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { ApiStatus } from '../health/ApiStatus';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
@@ -79,6 +80,11 @@ const START_STEPS = [
  * API, feature overview, and a live health check.
  */
 export function HomePage() {
+  usePageMeta({
+    title: 'Learn. Build. Innovate. Become.',
+    description:
+      'Structured technology courses with practical lessons, assessments, and real-world projects. Browse published learning paths and courses on CodePath-Academy.',
+  });
   const overview = useOverview();
   const favorites = useFavoriteCourses();
 

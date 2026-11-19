@@ -1,4 +1,5 @@
 import { Megaphone } from 'lucide-react';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Card, CardTitle } from '../../components/ui/Card';
@@ -19,6 +20,7 @@ function formatDate(value: string | null) {
  * announcements reach this list.
  */
 export function MyAnnouncementsPage() {
+  usePageMeta({ title: 'Announcements', noindex: true });
   const announcements = useMyAnnouncements();
 
   if (announcements.isPending) {

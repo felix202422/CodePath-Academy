@@ -1,5 +1,6 @@
 import { BookOpen, CircleCheck, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card } from '../../components/ui/Card';
@@ -10,6 +11,7 @@ import { StudentCourseCard } from './StudentCourseCard';
 
 /** Student overview uses only approved enrollments and recorded lesson progress. */
 export function StudentDashboardPage() {
+  usePageMeta({ title: 'Dashboard', noindex: true });
   const dashboard = useLearningDashboard();
 
   if (dashboard.isPending) return <SpinnerCentered label="Loading your learning dashboard…" />;

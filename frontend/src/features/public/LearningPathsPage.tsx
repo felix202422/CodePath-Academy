@@ -1,9 +1,15 @@
+import { usePageMeta } from '../../lib/pageMeta';
 import { PathCard } from './PathCard';
 import { QueryState } from './QueryState';
 import { usePaths } from './useCatalog';
 
 /** Public learning-path listing with real course counts. */
 export function LearningPathsPage() {
+  usePageMeta({
+    title: 'Career Paths',
+    description:
+      'Published technology learning paths with their real course counts — structured routes from foundations to advanced topics.',
+  });
   const paths = usePaths();
 
   return (

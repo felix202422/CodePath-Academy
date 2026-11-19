@@ -1,5 +1,6 @@
 import { History, PlayCircle, TriangleAlert } from 'lucide-react';
 import { useState } from 'react';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -31,6 +32,7 @@ const MODE_OPTIONS = [
  * result summary, the conflict review queue, and recent import history.
  */
 export function AdminContentPage() {
+  usePageMeta({ title: 'Content Import', noindex: true });
   const source = useImportSource();
   const conflicts = useImportRows('CONFLICT');
   const history = useImportRows();

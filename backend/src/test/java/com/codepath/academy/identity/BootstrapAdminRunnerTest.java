@@ -39,7 +39,8 @@ class BootstrapAdminRunnerTest {
                 new AppProperties.Web(new String[] {"http://localhost:5173"}, false),
                 new AppProperties.BootstrapAdmin(enabled, email, password),
                 new AppProperties.Curriculum("felix202422/CodePath-Masterclass", "", ""),
-                new AppProperties.Media("./data/test-media"));
+                new AppProperties.Media("./data/test-media"),
+                new AppProperties.Seo(""));
     }
 
     private BootstrapAdminRunner runner(AppProperties properties) {

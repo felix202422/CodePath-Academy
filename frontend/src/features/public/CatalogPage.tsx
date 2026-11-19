@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Link, useLocation, useSearchParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Select } from '../../components/ui/Field';
@@ -58,6 +59,11 @@ function getPageTokens(total: number, current: number): PageToken[] {
  * track (price, ratings, popularity, and enrollments) are deliberately absent.
  */
 export function CatalogPage() {
+  usePageMeta({
+    title: 'Browse Courses',
+    description:
+      'Browse published technology courses by level and learning path, with summaries, prerequisites, and enrollment requests in one place.',
+  });
   const catalog = useCatalog();
   const paths = usePaths();
   const overview = useOverview();

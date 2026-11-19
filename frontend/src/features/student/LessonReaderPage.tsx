@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, CheckCircle2, Paperclip } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -21,6 +22,7 @@ function isSafeResourceLocation(location: string) {
 
 /** Reader for one published lesson under an approved student enrollment. */
 export function LessonReaderPage() {
+  usePageMeta({ title: 'Lesson', noindex: true });
   const { courseSlug = '', lessonId = '' } = useParams<{
     courseSlug: string;
     lessonId: string;

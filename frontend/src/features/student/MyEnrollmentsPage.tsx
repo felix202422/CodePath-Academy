@@ -1,5 +1,6 @@
 import { BookOpen, Clock3 } from 'lucide-react';
 import { Link } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -26,6 +27,7 @@ function formatDate(value: string) {
 
 /** Enrollment requests and decisions belonging only to the signed-in student. */
 export function MyEnrollmentsPage() {
+  usePageMeta({ title: 'My Enrollments', noindex: true });
   const enrollments = useMyEnrollments();
 
   return (

@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { Alert } from '../../components/ui/Alert';
+import { usePageMeta } from '../../lib/pageMeta';
 import { CourseCard } from './CourseCard';
 import { ApiRequestError } from '../../lib/api';
 import { usePath } from './useCatalog';
@@ -11,6 +12,16 @@ export function PathDetailPage() {
   const { slug = '' } = useParams<{ slug: string }>();
   const path = usePath(slug);
   const favorites = useFavoriteCourses();
+
+  // Dynamic path metadata; a real 404 renders inline, so it stays noindex.
+  usePageMeta({
+    title: path.data?.name ?? 'Learning path',
+    description: path.data?.summary ?? undefined,
+    noindex:
+      path.isError &&
+      path.error instanceof ApiRequestError &&
+      path.error.status === 404,
+  });
 
   if (path.isPending) {
     return (

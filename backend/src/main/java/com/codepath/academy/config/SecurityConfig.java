@@ -89,7 +89,10 @@ public class SecurityConfig {
                                 "/actuator/info",
                                 "/v3/api-docs/**",
                                 "/api/v1/openapi.json",
-                                "/api/v1/swagger.html")
+                                "/api/v1/swagger.html",
+                                // Crawler files are anonymous by definition.
+                                "/robots.txt",
+                                "/sitemap.xml")
                         .permitAll()
                         .requestMatchers("/api/v1/me/enrollments", "/api/v1/me/enrollments/**")
                         .hasRole("STUDENT")

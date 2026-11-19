@@ -11,7 +11,8 @@ public record AppProperties(
         Web web,
         BootstrapAdmin bootstrapAdmin,
         Curriculum curriculum,
-        Media media
+        Media media,
+        Seo seo
 ) {
     public record Web(
             String[] corsAllowedOrigins,
@@ -32,5 +33,14 @@ public record AppProperties(
 
     public record Media(
             String root
+    ) {}
+
+    /**
+     * Absolute public origin used for crawler files (sitemap/robots). Empty means
+     * "derive from the request"; production sets APP_PUBLIC_BASE_URL to the real
+     * deployed origin so sitemap URLs never depend on proxy headers.
+     */
+    public record Seo(
+            String publicBaseUrl
     ) {}
 }

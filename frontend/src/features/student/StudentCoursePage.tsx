@@ -1,5 +1,6 @@
 import { ArrowLeft, BookOpen } from 'lucide-react';
 import { Link, useParams } from 'react-router';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Card, CardTitle } from '../../components/ui/Card';
@@ -23,6 +24,7 @@ function progressTone(status: LessonProgressStatus | null): 'success' | 'warning
 
 /** Ordered course outline; only published modules and lessons reach this screen. */
 export function StudentCoursePage() {
+  usePageMeta({ title: 'Course Outline', noindex: true });
   const { courseSlug = '' } = useParams<{ courseSlug: string }>();
   const course = useStudentCourse(courseSlug);
 

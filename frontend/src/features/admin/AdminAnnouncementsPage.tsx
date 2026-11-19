@@ -1,5 +1,6 @@
 import { Megaphone, Plus } from 'lucide-react';
 import { useState } from 'react';
+import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
@@ -40,6 +41,7 @@ function audienceLabel(audience: AnnouncementAdminResponse['audience']) {
  * through the dedicated /status action.
  */
 export function AdminAnnouncementsPage() {
+  usePageMeta({ title: 'Announcements', noindex: true });
   const [filter, setFilter] = useState<ContentStatus | ''>('');
   const announcements = useAdminAnnouncements(filter || undefined);
   const courses = useAdminCourses();
