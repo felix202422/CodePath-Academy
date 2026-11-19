@@ -25,6 +25,12 @@ jobs:
       - run: npm ci --no-fund --no-audit
       - run: npm test
       - run: npm run build
+      # CPA-003 dependency audit: fail the build on critical advisories. The
+      # known dev-tooling findings are below critical severity and visible in
+      # the step output; --audit-level=critical keeps the gate green without
+      # hiding them.
+      - name: Audit production dependencies
+        run: npm audit --audit-level=critical
 
   backend:
     name: Backend (test)
