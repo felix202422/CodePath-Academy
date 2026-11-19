@@ -1,6 +1,7 @@
 import { usePageMeta } from '../../lib/pageMeta';
 import { PathCard } from './PathCard';
 import { QueryState } from './QueryState';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { usePaths } from './useCatalog';
 
 /** Public learning-path listing with real course counts. */
@@ -21,7 +22,19 @@ export function LearningPathsPage() {
       </p>
 
       <div className="mt-8">
-        <QueryState query={paths}>
+        <QueryState
+          query={paths}
+          fallback={
+            <div role="status" aria-label="Loading learning paths">
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                {Array.from({ length: 6 }, (_, i) => (
+                  <Skeleton key={i} className="h-52 w-full" />
+                ))}
+              </div>
+              <span className="sr-only">Loading learning paths…</span>
+            </div>
+          }
+        >
           {(items) => (
             <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {items.map((path) => (

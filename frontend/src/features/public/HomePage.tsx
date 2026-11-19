@@ -13,7 +13,7 @@ import { ApiStatus } from '../health/ApiStatus';
 import { Button } from '../../components/ui/Button';
 import { Alert } from '../../components/ui/Alert';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
-import { SpinnerCentered } from '../../components/ui/Spinner';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { ScrollReveal } from '../../components/ui/ScrollReveal';
 import { ApiRequestError } from '../../lib/api';
 import { CourseCard } from './CourseCard';
@@ -155,7 +155,26 @@ export function HomePage() {
           </Link>
         </div>
 
-        {overview.isPending && <SpinnerCentered label="Loading catalog…" />}
+        {overview.isPending && (
+          <div role="status" aria-label="Loading catalog" className="mt-6 space-y-6">
+            <div className="flex gap-8">
+              <div>
+                <Skeleton className="h-4 w-40" />
+                <Skeleton className="mt-2 h-8 w-16" />
+              </div>
+              <div>
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="mt-2 h-8 w-16" />
+              </div>
+            </div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+              {Array.from({ length: 4 }, (_, i) => (
+                <Skeleton key={i} className="h-56 w-full" />
+              ))}
+            </div>
+            <span className="sr-only">Loading catalog…</span>
+          </div>
+        )}
         {overview.isError && (
           <Alert tone="danger" className="mt-4">
             {overview.error instanceof ApiRequestError

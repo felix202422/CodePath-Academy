@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
@@ -166,8 +166,16 @@ describe('student course enrollment', () => {
 
     expect(await screen.findByRole('heading', { name: 'Computer Foundations' })).toBeInTheDocument();
     expect(screen.getByText('1 learner is currently enrolled.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Sign in to request' })).toHaveAttribute('href', '/login');
-    expect(screen.getByRole('link', { name: 'Apply Now' })).toHaveAttribute('href', '/register');
+    // Scoped to the page article: the sticky mobile CTA also offers "Apply Now".
+    const article = screen.getByRole('article');
+    expect(within(article).getByRole('link', { name: 'Sign in to request' })).toHaveAttribute(
+      'href',
+      '/login',
+    );
+    expect(within(article).getByRole('link', { name: 'Apply Now' })).toHaveAttribute(
+      'href',
+      '/register',
+    );
     expect(screen.queryByRole('button', { name: 'Request enrollment' })).not.toBeInTheDocument();
   });
 

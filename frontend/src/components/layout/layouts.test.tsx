@@ -69,6 +69,17 @@ describe('PublicLayout', () => {
     );
     expect(screen.getByRole('navigation', { name: 'Primary mobile' })).toBeInTheDocument();
   });
+
+  it('pins the sticky mobile CTA and reserves matching bottom space', async () => {
+    mockAnonymousSession();
+    const { container } = renderShell(PublicLayout);
+
+    expect(await screen.findByRole('region', { name: 'Quick actions' })).toBeInTheDocument();
+    // Bottom padding (safe-area aware) keeps the footer clear of the fixed bar.
+    expect(container.firstElementChild?.className).toContain(
+      'pb-[calc(5rem_+_env(safe-area-inset-bottom))]',
+    );
+  });
 });
 
 describe('StudentLayout', () => {

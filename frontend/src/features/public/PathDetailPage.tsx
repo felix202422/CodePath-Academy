@@ -1,6 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import { Link, useParams } from 'react-router';
 import { Alert } from '../../components/ui/Alert';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { usePageMeta } from '../../lib/pageMeta';
 import { CourseCard } from './CourseCard';
 import { ApiRequestError } from '../../lib/api';
@@ -25,10 +26,21 @@ export function PathDetailPage() {
 
   if (path.isPending) {
     return (
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <p className="text-sm text-ink-muted" role="status">
-          Loading learning path…
-        </p>
+      <div
+        role="status"
+        aria-label="Loading learning path"
+        className="mx-auto max-w-6xl space-y-4 px-4 py-12 sm:px-6"
+      >
+        <Skeleton className="h-4 w-36" />
+        <Skeleton className="h-10 w-2/3" />
+        <Skeleton className="h-5 w-full" />
+        <Skeleton className="h-5 w-4/5" />
+        <div className="grid gap-5 pt-6 sm:grid-cols-2 lg:grid-cols-3">
+          {Array.from({ length: 6 }, (_, i) => (
+            <Skeleton key={i} className="h-56 w-full" />
+          ))}
+        </div>
+        <span className="sr-only">Loading learning path…</span>
       </div>
     );
   }

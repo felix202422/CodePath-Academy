@@ -5,6 +5,7 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { LoginPage } from './LoginPage';
 import { RegisterPage } from './RegisterPage';
+import { RegisterSuccessPage } from './RegisterSuccessPage';
 
 beforeEach(() => {
   // jsdom starts without cookies; mutations echo the double-submit CSRF cookie.
@@ -19,6 +20,7 @@ function renderPage(initialPath: '/login' | '/register') {
         <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/register/success" element={<RegisterSuccessPage />} />
           <Route path="/student" element={<h1>Student dashboard</h1>} />
           <Route path="/admin" element={<h1>Administration dashboard</h1>} />
         </Routes>
@@ -116,7 +118,7 @@ describe('RegisterPage', () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it('submits the request and shows the admin-approval message', async () => {
+  it('submits the request and lands on the thank-you page without implying approval', async () => {
     const fetchMock = vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
       const url = String(input);
       expect(String(url)).not.toContain('/auth/login');
@@ -140,10 +142,21 @@ describe('RegisterPage', () => {
     await userEvent.type(screen.getByLabelText(/Confirm password/), 'password123');
     await userEvent.click(screen.getByRole('button', { name: /Submit registration/ }));
 
+    // Dedicated thank-you route (never an implied approval).
     expect(
-      await screen.findByText('Registration submitted for administrator approval.'),
+      await screen.findByRole('heading', { name: 'Your registration has been submitted' }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/sign in after an administrator approves/i)).toBeInTheDocument();
+    expect(
+      screen.getByText('Registration submitted for administrator approval.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/not active yet/i)).toBeInTheDocument();
+    expect(screen.getByText(/does not mean your registration was approved/i)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Go to sign in' })).toHaveAttribute('href', '/login');
+    // Transactional screen: noindex + title set by the page.
+    await waitFor(() => expect(document.title).toBe('Registration received | CodePath-Academy'));
+    expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
+      'noindex, nofollow',
+    );
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(1));
     const [, init] = fetchMock.mock.calls[0] ?? [];

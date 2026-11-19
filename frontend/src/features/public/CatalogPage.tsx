@@ -10,6 +10,7 @@ import { usePageMeta } from '../../lib/pageMeta';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
 import { Select } from '../../components/ui/Field';
+import { Skeleton } from '../../components/ui/Skeleton';
 import type { CourseLevel, CourseSummary } from './catalogApi';
 import { CourseCard } from './CourseCard';
 import { QueryState } from './QueryState';
@@ -306,7 +307,20 @@ export function CatalogPage() {
           </aside>
 
           <section aria-label="Course results" className="min-w-0">
-            <QueryState query={catalog}>
+            <QueryState
+              query={catalog}
+              fallback={
+                <div role="status" aria-label="Loading courses" className="space-y-4">
+                  <Skeleton className="h-8 w-56" />
+                  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Array.from({ length: 8 }, (_, i) => (
+                      <Skeleton key={i} className="h-60 w-full" />
+                    ))}
+                  </div>
+                  <span className="sr-only">Loading courses…</span>
+                </div>
+              }
+            >
               {() => {
                 const results = filteredCourses;
                 const resultCount = results.length;

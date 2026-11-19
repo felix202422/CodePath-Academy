@@ -13,7 +13,7 @@ const components: Components = {
       <a
         href={href}
         target={external ? '_blank' : undefined}
-        rel={external ? 'noreferrer' : undefined}
+        rel={external ? 'noopener noreferrer' : undefined}
         className="font-medium text-accent-700 underline underline-offset-2 hover:text-accent-800"
       >
         {children}
@@ -25,6 +25,7 @@ const components: Components = {
       src={src}
       alt={alt ?? ''}
       loading="lazy"
+      decoding="async"
       className="my-5 max-h-[36rem] rounded-lg border border-slate-200 object-contain"
     />
   ),

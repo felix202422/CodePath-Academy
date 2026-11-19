@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { Link } from 'react-router';
+import { Link, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
@@ -35,12 +35,18 @@ export function RegisterPage() {
     description:
       'Create a student account on CodePath-Academy. Registrations are reviewed by an administrator before an account is activated.',
   });
+  const navigate = useNavigate();
   const form = useForm<RegistrationValues>({
     resolver: zodResolver(registrationSchema),
     defaultValues: { fullName: '', email: '', password: '', confirmPassword: '', interests: '' },
   });
   const registrationMutation = useMutation({
     mutationFn: registerAccount,
+    // A dedicated thank-you page (never an implied approval) acknowledges the
+    // request; the backend message travels along as router state.
+    onSuccess: (data) => {
+      navigate('/register/success', { replace: true, state: { message: data.message } });
+    },
   });
 
   const submit = form.handleSubmit((values) => {
@@ -57,28 +63,7 @@ export function RegisterPage() {
   return (
     <section aria-labelledby="register-heading" className="mx-auto max-w-xl px-4 py-10 sm:py-14">
       <Card className="p-6 sm:p-8">
-        {registrationMutation.data ? (
-          <div>
-            <p className="text-sm font-semibold tracking-wide text-accent-600 uppercase">Request received</p>
-            <h1 id="register-heading" className="mt-2 text-2xl font-bold text-navy-950">
-              Your registration is submitted
-            </h1>
-            <Alert tone="success" className="mt-5">
-              {registrationMutation.data.message}
-            </Alert>
-            <p className="mt-4 text-sm text-ink-muted">
-              You can sign in after an administrator approves your request.
-            </p>
-            <Link
-              to="/login"
-              className="mt-5 inline-flex font-medium text-accent-600 underline underline-offset-2"
-            >
-              Go to sign in
-            </Link>
-          </div>
-        ) : (
-          <>
-            <p className="text-sm font-semibold tracking-wide text-accent-600 uppercase">Join the academy</p>
+        <p className="text-sm font-semibold tracking-wide text-accent-600 uppercase">Join the academy</p>
             <h1 id="register-heading" className="mt-2 text-2xl font-bold text-navy-950">
               Create a student account
             </h1>
@@ -154,8 +139,6 @@ export function RegisterPage() {
                 Sign in
               </Link>
             </p>
-          </>
-        )}
       </Card>
     </section>
   );

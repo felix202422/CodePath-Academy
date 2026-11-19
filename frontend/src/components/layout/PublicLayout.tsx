@@ -1,19 +1,29 @@
-import { Link, Outlet, useNavigate } from 'react-router';
+import { Link, Outlet, useLocation, useNavigate } from 'react-router';
 import { Alert } from '../ui/Alert';
 import { Button } from '../ui/Button';
 import { PublicHeader } from './PublicHeader';
+import { STICKY_CTA_HIDDEN_ON, StickyMobileCta } from './StickyMobileCta';
 import { homeForRole } from '../../features/auth/authApi';
 import { useLogout, useSession } from '../../features/auth/useSession';
 
 /** Shell for anonymous visitors: primary nav, auth entry points, footer. */
 export function PublicLayout() {
   const navigate = useNavigate();
+  const location = useLocation();
   const session = useSession();
   const logout = useLogout();
   const user = session.data;
+  // The shell reserves bottom space only when the sticky bar is actually shown,
+  // so content and footer are never covered (and auth pages get no dead space).
+  const showStickyCta =
+    !user && !STICKY_CTA_HIDDEN_ON.test(location.pathname);
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div
+      className={`flex min-h-screen flex-col${
+        showStickyCta ? ' pb-[calc(5rem_+_env(safe-area-inset-bottom))] xl:pb-0' : ''
+      }`}
+    >
       <PublicHeader
         actions={
           user ? (
@@ -92,6 +102,7 @@ export function PublicLayout() {
           </p>
         </div>
       </footer>
+      <StickyMobileCta signedIn={Boolean(user)} />
     </div>
   );
 }

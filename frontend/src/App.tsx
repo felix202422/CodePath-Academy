@@ -3,6 +3,7 @@ import { Route, Routes } from 'react-router';
 import { AdminLayout } from './components/layout/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
+import { RouteErrorBoundary } from './components/errors/AppErrorBoundary';
 import { SpinnerCentered } from './components/ui/Spinner';
 import { NotFoundPage } from './features/errors/NotFoundPage';
 import { AboutPage } from './features/public/AboutPage';
@@ -30,6 +31,7 @@ import { StudentCoursePage } from './features/student/StudentCoursePage';
 import { StudentDashboardPage } from './features/student/StudentDashboardPage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
+import { RegisterSuccessPage } from './features/auth/RegisterSuccessPage';
 import { RequireRole } from './features/auth/RequireRole';
 import { ThemeProvider } from './features/theme/ThemeContext';
 
@@ -48,6 +50,9 @@ const LessonReaderPage = lazy(async () => {
 export default function App() {
   return (
     <ThemeProvider>
+      {/* A crash in one screen falls back to an honest error page instead of a
+          blank app; navigating resets the boundary. */}
+      <RouteErrorBoundary>
       <Routes>
       <Route element={<PublicLayout />}>
         <Route path="/" element={<HomePage />} />
@@ -58,6 +63,7 @@ export default function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register/success" element={<RegisterSuccessPage />} />
         <Route path="*" element={<NotFoundPage />} />
       </Route>
 
@@ -110,6 +116,7 @@ export default function App() {
         </Route>
       </Route>
       </Routes>
+      </RouteErrorBoundary>
     </ThemeProvider>
   );
 }

@@ -5,6 +5,7 @@ import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Button } from '../../components/ui/Button';
 import { Card, CardTitle } from '../../components/ui/Card';
+import { Skeleton } from '../../components/ui/Skeleton';
 import { ApiRequestError } from '../../lib/api';
 import { useSession } from '../auth/useSession';
 import { useMyCourseEnrollment, useRequestEnrollment } from '../enrollment/useEnrollments';
@@ -47,10 +48,22 @@ export function CourseDetailPage() {
 
   if (course.isPending) {
     return (
-      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
-        <p className="text-sm text-ink-muted" role="status">
-          Loading course…
-        </p>
+      <div
+        role="status"
+        aria-label="Loading course"
+        className="mx-auto max-w-4xl space-y-4 px-4 py-12 sm:px-6"
+      >
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-6 w-44" />
+        <Skeleton className="h-10 w-2/3" />
+        <Skeleton className="h-5 w-full" />
+        <Skeleton className="h-5 w-5/6" />
+        <div className="grid gap-4 pt-6 sm:grid-cols-3">
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+          <Skeleton className="h-28" />
+        </div>
+        <span className="sr-only">Loading course…</span>
       </div>
     );
   }
@@ -237,7 +250,7 @@ export function CourseDetailPage() {
             <a
               href={data.sourceRepository}
               target="_blank"
-              rel="noreferrer"
+              rel="noopener noreferrer"
               className="text-accent-600 hover:underline"
             >
               CodePath-Masterclass
