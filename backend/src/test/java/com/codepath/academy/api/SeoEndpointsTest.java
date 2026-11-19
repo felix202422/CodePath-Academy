@@ -109,10 +109,11 @@ class SeoEndpointsTest {
         Document doc = parseXml(xml);
         NodeList urls = doc.getElementsByTagName("url");
 
-        // 4 static public routes + 7 published paths + 20 published courses.
-        assertEquals(31, urls.getLength(), "unexpected sitemap size");
+        // 7 static public routes + 7 published paths + 20 published courses.
+        assertEquals(34, urls.getLength(), "unexpected sitemap size");
 
-        Set<String> staticRoutes = Set.of("/", "/courses", "/paths", "/about");
+        Set<String> staticRoutes = Set.of(
+                "/", "/courses", "/paths", "/about", "/contact", "/privacy", "/terms");
         Set<String> paths = new HashSet<>();
         for (int i = 0; i < urls.getLength(); i++) {
             Element url = (Element) urls.item(i);
@@ -132,7 +133,8 @@ class SeoEndpointsTest {
             }
         }
 
-        assertTrue(paths.containsAll(List.of("/", "/courses", "/paths", "/about")),
+        assertTrue(paths.containsAll(List.of(
+                        "/", "/courses", "/paths", "/about", "/contact", "/privacy", "/terms")),
                 "static routes missing: " + paths);
         assertTrue(paths.contains("/paths/frontend-development"), "known published path missing");
         assertTrue(paths.contains("/courses/java-programming"), "known published course missing");
@@ -199,8 +201,8 @@ class SeoEndpointsTest {
         assertTrue(xml.contains("/courses/" + controlCourse.getSlug()),
                 "published course missing from the sitemap");
 
-        // 31 baseline + the control course only.
-        assertEquals(32, doc.getElementsByTagName("url").getLength());
+        // 34 baseline (7 static + 7 paths + 20 courses) + the control course only.
+        assertEquals(35, doc.getElementsByTagName("url").getLength());
     }
 
     @Test

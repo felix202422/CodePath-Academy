@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 
 export function NotFoundPage() {
   usePageMeta({ title: 'Page Not Found', noindex: true });
@@ -11,8 +11,8 @@ export function NotFoundPage() {
       <p className="mt-4 text-ink-muted">
         The page you are looking for does not exist or has moved.
       </p>
-      <Link to="/" className="mt-8">
-        <Button>Back to home</Button>
+      <Link to="/" className={buttonClasses('primary', 'md', 'mt-8')}>
+        Back to home
       </Link>
     </div>
   );

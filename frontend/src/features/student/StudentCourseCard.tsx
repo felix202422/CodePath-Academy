@@ -1,7 +1,7 @@
 import { ArrowRight, BookOpen } from 'lucide-react';
 import { Link } from 'react-router';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
 import type { StudentCourseProgress } from './learningApi';
 import { LearningProgressBar } from './LearningProgressBar';
@@ -58,11 +58,9 @@ export function StudentCourseCard({ course }: StudentCourseCardProps) {
           <BookOpen className="size-4" aria-hidden="true" />
           {course.totalLessonCount} {course.totalLessonCount === 1 ? 'lesson' : 'lessons'}
         </span>
-        <Link to={target}>
-          <Button size="sm" variant="outline">
-            {actionLabel}
-            <ArrowRight className="size-4" aria-hidden="true" />
-          </Button>
+        <Link to={target} className={buttonClasses('outline', 'sm')}>
+          {actionLabel}
+          <ArrowRight className="size-4" aria-hidden="true" />
         </Link>
       </div>
     </Card>

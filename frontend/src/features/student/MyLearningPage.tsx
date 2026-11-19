@@ -2,7 +2,7 @@ import { BookOpen } from 'lucide-react';
 import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SpinnerCentered } from '../../components/ui/Spinner';
 import { StudentCourseCard } from './StudentCourseCard';
@@ -35,9 +35,11 @@ export function MyLearningPage() {
           description="Browse published courses and request access. Approved enrollments will appear here."
           action={(
             <div className="flex flex-wrap justify-center gap-2">
-              <Link to="/courses"><Button size="sm">Browse courses</Button></Link>
-              <Link to="/student/enrollments">
-                <Button size="sm" variant="outline">View requests</Button>
+              <Link to="/courses" className={buttonClasses('primary', 'sm')}>
+                Browse courses
+              </Link>
+              <Link to="/student/enrollments" className={buttonClasses('outline', 'sm')}>
+                View requests
               </Link>
             </div>
           )}

@@ -67,13 +67,14 @@ export function PublicLayout() {
       <footer className="border-t border-slate-200 bg-surface">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <Link to="/" className="inline-flex items-center gap-2.5" aria-label="CodePath Academy home">
+            <Link to="/" className="inline-flex items-center gap-2.5" aria-label="CP CodePath Academy home">
               <span
                 aria-hidden="true"
                 className="flex size-9 items-center justify-center rounded-xl bg-navy-900 text-xs font-bold tracking-tight text-white"
               >
                 CP
               </span>
+              {' '}
               <span className="font-bold tracking-tight text-navy-950">CodePath Academy</span>
             </Link>
             <p className="mt-3 max-w-sm text-sm leading-6 text-ink-muted">

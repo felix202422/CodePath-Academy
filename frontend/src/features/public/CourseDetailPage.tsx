@@ -231,7 +231,7 @@ export function CourseDetailPage() {
               <li key={prereq.slug}>
                 <Link
                   to={`/courses/${prereq.slug}`}
-                  className="text-accent-600 hover:underline"
+                  className="text-accent-600 underline underline-offset-2 hover:text-accent-700"
                 >
                   {prereq.title}
                 </Link>
@@ -251,7 +251,7 @@ export function CourseDetailPage() {
               href={data.sourceRepository}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-accent-600 hover:underline"
+              className="text-accent-600 underline underline-offset-2 hover:text-accent-700"
             >
               CodePath-Masterclass
             </a>{' '}

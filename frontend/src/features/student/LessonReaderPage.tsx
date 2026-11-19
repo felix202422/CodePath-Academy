@@ -5,6 +5,7 @@ import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Card } from '../../components/ui/Card';
 import { SpinnerCentered } from '../../components/ui/Spinner';
 import { MarkdownContent } from '../../components/ui/MarkdownContent';
@@ -143,23 +144,25 @@ export function LessonReaderPage() {
 
       <nav aria-label="Lesson navigation" className="flex flex-wrap justify-between gap-3 border-t border-slate-200 pt-5">
         {data.previousLessonId ? (
-          <Link to={`/student/learning/${data.courseSlug}/lessons/${data.previousLessonId}`}>
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="size-4" aria-hidden="true" />
-              Previous lesson
-            </Button>
+          <Link
+            to={`/student/learning/${data.courseSlug}/lessons/${data.previousLessonId}`}
+            className={buttonClasses('outline', 'sm')}
+          >
+            <ArrowLeft className="size-4" aria-hidden="true" />
+            Previous lesson
           </Link>
         ) : <span />}
         {data.nextLessonId ? (
-          <Link to={`/student/learning/${data.courseSlug}/lessons/${data.nextLessonId}`}>
-            <Button variant="primary" size="sm">
-              Next lesson
-              <ArrowRight className="size-4" aria-hidden="true" />
-            </Button>
+          <Link
+            to={`/student/learning/${data.courseSlug}/lessons/${data.nextLessonId}`}
+            className={buttonClasses('primary', 'sm')}
+          >
+            Next lesson
+            <ArrowRight className="size-4" aria-hidden="true" />
           </Link>
         ) : (
-          <Link to={`/student/learning/${data.courseSlug}`}>
-            <Button variant="outline" size="sm">Back to course outline</Button>
+          <Link to={`/student/learning/${data.courseSlug}`} className={buttonClasses('outline', 'sm')}>
+            Back to course outline
           </Link>
         )}
       </nav>

@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge, type BadgeTone } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Card, CardTitle } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { useMyEnrollments } from '../enrollment/useEnrollments';
@@ -55,8 +55,8 @@ export function MyEnrollmentsPage() {
           title="No enrollment requests yet"
           description="Browse the published courses and request access to a course you want to study."
           action={(
-            <Link to="/courses">
-              <Button size="sm">Browse courses</Button>
+            <Link to="/courses" className={buttonClasses('primary', 'sm')}>
+              Browse courses
             </Link>
           )}
         />

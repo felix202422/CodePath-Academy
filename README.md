@@ -50,7 +50,9 @@ Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request, follow
 [`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) in all project spaces, and report vulnerabilities
 privately as described in [`SECURITY.md`](SECURITY.md). API and database references live in
 [`docs/API.md`](docs/API.md) and [`docs/DATABASE.md`](docs/DATABASE.md); deployment and backup
-procedures are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). The project is
+procedures are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md), and every production-readiness
+requirement is mapped to its implementation and verification tool in
+[`docs/VERIFICATION-CHECKLIST.md`](docs/VERIFICATION-CHECKLIST.md). The project is
 [MIT-licensed](LICENSE).
 
 ## Project status

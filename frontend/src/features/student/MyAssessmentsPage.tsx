@@ -4,6 +4,7 @@ import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
 import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Card, CardTitle } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import type { StudentAssessment } from './assessmentApi';
@@ -74,8 +75,8 @@ export function MyAssessmentsPage() {
           title="No assessments yet"
           description="Published assessments for your enrolled courses appear here once your access is approved."
           action={(
-            <Link to="/student/learning">
-              <Button size="sm">Go to my learning</Button>
+            <Link to="/student/learning" className={buttonClasses('primary', 'sm')}>
+              Go to my learning
             </Link>
           )}
         />

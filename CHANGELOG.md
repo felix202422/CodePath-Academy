@@ -135,5 +135,22 @@ All notable changes to CodePath-Academy are documented here. Format follows
   the sticky mobile CTA now waits for the cookie decision so two fixed bars never stack;
   and `docs/API.md`, `docs/DATABASE.md`, `docs/DEPLOYMENT.md` gained the contact/inbox,
   V6, and CSP `script-src` notes.
+- Production-readiness verification tooling (Wave E): `scripts/verify_site.py`, a
+  read-only stdlib checker that validates crawler files, sitemap coverage against the
+  live public API, the social-preview tag inventory, the favicon/web-manifest assets
+  (rejecting SPA-fallback responses), API security headers, honest 401 JSON, and the
+  CSRF/validation contracts — 84 checks; `docs/VERIFICATION-CHECKLIST.md` mapping every
+  requirement to its implementation and verification tool with honest limitation notes
+  (linked from the README). The sitemap's static routes now include `/contact`,
+  `/privacy`, and `/terms` (7 routes, 34 URLs) so the Phase 14 pages are crawlable.
+- Accessibility fixes from Lighthouse/axe auditing (Wave E): navigating controls no
+  longer nest `<button>` inside links — a shared `buttonClasses()` helper in
+  `components/ui/buttonStyles.ts` styles anchors as buttons at 14 sites across 10
+  files (removing the undersized-target failure); logo links gained an accessible name
+  containing their visible badge text; the hero paragraph's contrast was raised to
+  4.5:1+; and in-text links are underlined so they are not distinguished by color
+  alone. Lighthouse now reports 100/100/100 (accessibility, best practices, SEO) with
+  zero failures on `/`, `/courses/computer-foundations`, and
+  `/paths/software-engineering`.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

@@ -111,14 +111,17 @@ class SeoControllerTest {
         assertTrue(xml.contains("<loc>http://localhost:5173/courses</loc>"), xml);
         assertTrue(xml.contains("<loc>http://localhost:5173/paths</loc>"), xml);
         assertTrue(xml.contains("<loc>http://localhost:5173/about</loc>"), xml);
+        assertTrue(xml.contains("<loc>http://localhost:5173/contact</loc>"), xml);
+        assertTrue(xml.contains("<loc>http://localhost:5173/privacy</loc>"), xml);
+        assertTrue(xml.contains("<loc>http://localhost:5173/terms</loc>"), xml);
         assertTrue(xml.contains("<loc>http://localhost:5173/paths/frontend-development</loc>"), xml);
         assertTrue(xml.contains("<lastmod>2026-11-19T10:11:12Z</lastmod>"), xml);
 
         // XML metacharacters in a location never break the document.
         assertTrue(xml.contains("<loc>http://localhost:5173/courses/a&amp;b</loc>"), xml);
 
-        // 4 static routes + 3 entries; a null lastmod omits the element entirely.
-        assertEquals(7, xml.split("<url>", -1).length - 1);
+        // 7 static routes + 3 entries; a null lastmod omits the element entirely.
+        assertEquals(10, xml.split("<url>", -1).length - 1);
         assertEquals(2, xml.split("<lastmod>", -1).length - 1);
         assertTrue(xml.endsWith("</urlset>\n"), xml);
     }

@@ -2,7 +2,7 @@ import { BookOpen, CircleCheck, GraduationCap } from 'lucide-react';
 import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Card } from '../../components/ui/Card';
 import { EmptyState } from '../../components/ui/EmptyState';
 import { SpinnerCentered } from '../../components/ui/Spinner';
@@ -38,9 +38,11 @@ export function StudentDashboardPage() {
           description="Request access to a published course. Your courses will appear here after an administrator approves your request."
           action={(
             <div className="flex flex-wrap justify-center gap-2">
-              <Link to="/courses"><Button size="sm">Browse courses</Button></Link>
-              <Link to="/student/enrollments">
-                <Button size="sm" variant="outline">View requests</Button>
+              <Link to="/courses" className={buttonClasses('primary', 'sm')}>
+                Browse courses
+              </Link>
+              <Link to="/student/enrollments" className={buttonClasses('outline', 'sm')}>
+                View requests
               </Link>
             </div>
           )}

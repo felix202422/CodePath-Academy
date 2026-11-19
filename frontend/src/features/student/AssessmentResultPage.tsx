@@ -3,7 +3,7 @@ import { Link, useParams } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
 import { Badge } from '../../components/ui/Badge';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { SpinnerCentered } from '../../components/ui/Spinner';
 import type { QuestionResult } from './assessmentApi';
 import { useAttemptResult } from './useAssessments';
@@ -169,11 +169,9 @@ export function AssessmentResultPage() {
       </ol>
 
       <div className="flex flex-wrap gap-3">
-        <Link to="/student/assessments">
-          <Button variant="outline">
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Back to assessments
-          </Button>
+        <Link to="/student/assessments" className={buttonClasses('outline')}>
+          <ArrowLeft className="size-4" aria-hidden="true" />
+          Back to assessments
         </Link>
       </div>
     </div>

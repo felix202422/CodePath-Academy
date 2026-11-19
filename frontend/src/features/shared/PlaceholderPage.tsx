@@ -2,7 +2,7 @@ import { Construction } from 'lucide-react';
 import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { Alert } from '../../components/ui/Alert';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 
 export interface PlaceholderPageProps {
   title: string;
@@ -31,8 +31,8 @@ export function PlaceholderPage({ title, phase, description }: PlaceholderPagePr
         </Alert>
       </div>
       <div className="mt-6">
-        <Link to="/">
-          <Button variant="outline">Back to home</Button>
+        <Link to="/" className={buttonClasses('outline')}>
+          Back to home
         </Link>
       </div>
     </div>

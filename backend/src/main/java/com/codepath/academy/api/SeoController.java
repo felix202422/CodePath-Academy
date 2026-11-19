@@ -28,7 +28,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class SeoController {
 
     /** Indexable public SPA routes (stable, no dynamic segments). */
-    static final List<String> PUBLIC_ROUTES = List.of("/", "/courses", "/paths", "/about");
+    static final List<String> PUBLIC_ROUTES = List.of(
+            "/", "/courses", "/paths", "/about", "/contact", "/privacy", "/terms");
 
     /** Host header shape: hostname with an optional port. Rejects everything else. */
     private static final Pattern SAFE_HOST = Pattern.compile("[A-Za-z0-9.\\-]+(:\\d{1,5})?");

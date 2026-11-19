@@ -140,7 +140,7 @@ export function PublicHeader({ actions }: PublicHeaderProps) {
         <Link
           to="/"
           className="flex shrink-0 items-center gap-2.5"
-          aria-label="CodePath Academy home"
+          aria-label="CP CodePath Academy home"
           onClick={closeMenus}
         >
           <span
@@ -149,6 +149,7 @@ export function PublicHeader({ actions }: PublicHeaderProps) {
           >
             CP
           </span>
+          {' '}
           <span className="whitespace-nowrap text-base font-bold tracking-tight text-navy-950 sm:text-lg">
             CodePath Academy
           </span>

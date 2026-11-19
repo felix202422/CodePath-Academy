@@ -10,7 +10,7 @@ import {
 import { Link } from 'react-router';
 import { usePageMeta } from '../../lib/pageMeta';
 import { ApiStatus } from '../health/ApiStatus';
-import { Button } from '../../components/ui/Button';
+import { buttonClasses } from '../../components/ui/buttonStyles';
 import { Alert } from '../../components/ui/Alert';
 import { Card, CardDescription, CardTitle } from '../../components/ui/Card';
 import { Skeleton } from '../../components/ui/Skeleton';
@@ -99,18 +99,16 @@ export function HomePage() {
             <h1 className="mt-3 text-4xl font-bold tracking-tight text-navy-950 sm:text-6xl">
               Learn. Build. Innovate. <span className="text-accent-600">Become.</span>
             </h1>
-            <p className="mt-5 max-w-2xl text-lg leading-7 text-ink-muted">
+            <p className="mt-5 max-w-2xl text-lg leading-7 text-slate-600">
               Explore the courses currently published, compare learning paths, and review
               prerequisites before choosing a clear place to begin.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
-              <Link to="/courses">
-                <Button size="lg">Browse courses</Button>
+              <Link to="/courses" className={buttonClasses('primary', 'lg')}>
+                Browse courses
               </Link>
-              <Link to="/paths">
-                <Button size="lg" variant="outline">
-                  Explore learning paths
-                </Button>
+              <Link to="/paths" className={buttonClasses('outline', 'lg')}>
+                Explore learning paths
               </Link>
             </div>
           </div>
