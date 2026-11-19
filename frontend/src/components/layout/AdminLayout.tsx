@@ -12,6 +12,7 @@ const ADMIN_NAV: NavItem[] = [
   { to: '/admin/courses', label: 'Courses' },
   { to: '/admin/content', label: 'Content' },
   { to: '/admin/announcements', label: 'Announcements' },
+  { to: '/admin/messages', label: 'Messages' },
   { to: '/admin/audit', label: 'Audit log' },
 ];
 

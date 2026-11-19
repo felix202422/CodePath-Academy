@@ -42,6 +42,19 @@ All configuration is environment variables (names in `.env.example`; values neve
 | `APP_MEDIA_ROOT` | Media storage directory (production: persistent volume) |
 | `APP_PUBLIC_BASE_URL` | Absolute origin for the crawler files (`/sitemap.xml`, `/robots.txt`); set to the real deployed origin in production so sitemap URLs never depend on proxy headers |
 | `VITE_SITE_URL` | Build-time origin baked into `index.html` canonical/Open Graph/Twitter tags (public by design — never put secrets in `VITE_` variables); empty keeps them origin-relative |
+| `VITE_CONTACT_EMAIL` | Optional mailbox shown as a `mailto:` fallback on `/contact`; empty (default) hides it — the form always works through the backend inbox, so never invent an address |
+| `VITE_ANALYTICS_URL` | Optional analytics script URL; empty (default) = analytics disabled entirely. When set, the script loads only after the visitor explicitly opts in via the cookie notice |
+
+### Analytics and Content-Security-Policy
+
+Analytics is pluggable and off by default. If you configure `VITE_ANALYTICS_URL`
+to a third-party origin, add that origin to the `script-src` directive of the
+Content-Security-Policy header at your edge (the sample Nginx config ships
+without a CSP so it never breaks self-hosted setups — add one tailored to your
+deployment). The consent gate is enforced in code (`frontend/src/lib/analytics.ts`):
+the tag is only injected after an explicit "Allow analytics" decision, events
+carry names only (no PII, no identifiers), and a refusal or missing decision is
+a hard no-op.
 
 Production checklist:
 

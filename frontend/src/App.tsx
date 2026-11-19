@@ -4,6 +4,7 @@ import { AdminLayout } from './components/layout/AdminLayout';
 import { PublicLayout } from './components/layout/PublicLayout';
 import { StudentLayout } from './components/layout/StudentLayout';
 import { RouteErrorBoundary } from './components/errors/AppErrorBoundary';
+import { CookieBanner } from './components/cookie/CookieBanner';
 import { SpinnerCentered } from './components/ui/Spinner';
 import { NotFoundPage } from './features/errors/NotFoundPage';
 import { AboutPage } from './features/public/AboutPage';
@@ -12,6 +13,10 @@ import { CourseDetailPage } from './features/public/CourseDetailPage';
 import { HomePage } from './features/public/HomePage';
 import { LearningPathsPage } from './features/public/LearningPathsPage';
 import { PathDetailPage } from './features/public/PathDetailPage';
+import { ContactPage } from './features/contact/ContactPage';
+import { ContactSuccessPage } from './features/contact/ContactSuccessPage';
+import { PrivacyPage } from './features/legal/PrivacyPage';
+import { TermsPage } from './features/legal/TermsPage';
 import { PlaceholderPage } from './features/shared/PlaceholderPage';
 import { AdminContentPage } from './features/admin/AdminContentPage';
 import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
@@ -19,6 +24,7 @@ import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
 import { AdminDashboardPage } from './features/admin/AdminDashboardPage';
 import { AdminAnnouncementsPage } from './features/admin/AdminAnnouncementsPage';
 import { AdminAuditPage } from './features/admin/AdminAuditPage';
+import { AdminMessagesPage } from './features/admin/AdminMessagesPage';
 import { AdminEnrollmentsPage } from './features/admin/AdminEnrollmentsPage';
 import { AdminStudentsPage } from './features/admin/AdminStudentsPage';
 import { MyEnrollmentsPage } from './features/student/MyEnrollmentsPage';
@@ -61,6 +67,10 @@ export default function App() {
         <Route path="/paths" element={<LearningPathsPage />} />
         <Route path="/paths/:slug" element={<PathDetailPage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/contact/thank-you" element={<ContactSuccessPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/register/success" element={<RegisterSuccessPage />} />
@@ -111,12 +121,16 @@ export default function App() {
           <Route path="courses/:courseId" element={<AdminCourseDetailPage />} />
           <Route path="content" element={<AdminContentPage />} />
           <Route path="announcements" element={<AdminAnnouncementsPage />} />
+          <Route path="messages" element={<AdminMessagesPage />} />
           <Route path="audit" element={<AdminAuditPage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
       </Routes>
       </RouteErrorBoundary>
+      {/* Global: cookie notice + preference center, mounted above the route
+          tree so it survives navigation (and route crashes). */}
+      <CookieBanner />
     </ThemeProvider>
   );
 }

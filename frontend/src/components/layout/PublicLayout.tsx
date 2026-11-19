@@ -5,6 +5,7 @@ import { PublicHeader } from './PublicHeader';
 import { STICKY_CTA_HIDDEN_ON, StickyMobileCta } from './StickyMobileCta';
 import { homeForRole } from '../../features/auth/authApi';
 import { useLogout, useSession } from '../../features/auth/useSession';
+import { requestPreferencesOpen, useConsent } from '../../lib/consent';
 
 /** Shell for anonymous visitors: primary nav, auth entry points, footer. */
 export function PublicLayout() {
@@ -12,11 +13,14 @@ export function PublicLayout() {
   const location = useLocation();
   const session = useSession();
   const logout = useLogout();
+  const consent = useConsent();
   const user = session.data;
   // The shell reserves bottom space only when the sticky bar is actually shown,
   // so content and footer are never covered (and auth pages get no dead space).
+  // While the cookie notice is undecided it occupies that bottom edge instead,
+  // so the CTA waits for the visitor's choice to avoid stacking two bars.
   const showStickyCta =
-    !user && !STICKY_CTA_HIDDEN_ON.test(location.pathname);
+    !user && consent !== null && !STICKY_CTA_HIDDEN_ON.test(location.pathname);
 
   return (
     <div
@@ -61,7 +65,7 @@ export function PublicLayout() {
         <Outlet />
       </main>
       <footer className="border-t border-slate-200 bg-surface">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr]">
+        <div className="mx-auto grid max-w-7xl gap-8 px-4 py-10 sm:px-6 md:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
             <Link to="/" className="inline-flex items-center gap-2.5" aria-label="CodePath Academy home">
               <span
@@ -95,6 +99,24 @@ export function PublicLayout() {
               <li><Link className="hover:text-accent-700" to="/paths">Find a learning path</Link></li>
             </ul>
           </nav>
+
+          <nav aria-label="Legal">
+            <h2 className="text-sm font-semibold text-ink">Legal</h2>
+            <ul className="mt-3 space-y-2 text-sm text-ink-muted">
+              <li><Link className="hover:text-accent-700" to="/contact">Contact</Link></li>
+              <li><Link className="hover:text-accent-700" to="/privacy">Privacy Policy</Link></li>
+              <li><Link className="hover:text-accent-700" to="/terms">Terms of Use</Link></li>
+              <li>
+                <button
+                  type="button"
+                  className="cursor-pointer text-left hover:text-accent-700"
+                  onClick={requestPreferencesOpen}
+                >
+                  Cookie preferences
+                </button>
+              </li>
+            </ul>
+          </nav>
         </div>
         <div className="border-t border-slate-100">
           <p className="mx-auto max-w-7xl px-4 py-4 text-xs text-ink-muted sm:px-6">
@@ -102,7 +124,9 @@ export function PublicLayout() {
           </p>
         </div>
       </footer>
-      <StickyMobileCta signedIn={Boolean(user)} />
+      {/* Rendered only when the shell shows it: signed-out, past the cookie
+          choice, and on routes where a persistent CTA makes sense. */}
+      {showStickyCta && <StickyMobileCta signedIn={Boolean(user)} />}
     </div>
   );
 }

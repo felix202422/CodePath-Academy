@@ -85,6 +85,8 @@ public class SecurityConfig {
                                 "/api/v1/auth/**",
                                 "/api/v1/public/**",
                                 "/api/v1/registration/**",
+                                // Public contact form: anonymous by design, CSRF still applies.
+                                "/api/v1/contact",
                                 "/actuator/health/**",
                                 "/actuator/info",
                                 "/v3/api-docs/**",

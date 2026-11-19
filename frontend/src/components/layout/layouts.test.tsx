@@ -34,6 +34,7 @@ function renderShell(Shell: () => React.JSX.Element, path = '/') {
 
 afterEach(() => {
   vi.restoreAllMocks();
+  window.localStorage.removeItem('cpa.consent');
 });
 
 describe('PublicLayout', () => {
@@ -70,8 +71,23 @@ describe('PublicLayout', () => {
     expect(screen.getByRole('navigation', { name: 'Primary mobile' })).toBeInTheDocument();
   });
 
-  it('pins the sticky mobile CTA and reserves matching bottom space', async () => {
+  it('keeps the sticky CTA off until the cookie choice is made', async () => {
     mockAnonymousSession();
+    const { container } = renderShell(PublicLayout);
+
+    // Undecided consent: the cookie notice owns the bottom edge, so the
+    // second fixed bar waits and no extra padding is reserved yet.
+    expect(screen.queryByRole('region', { name: 'Quick actions' })).not.toBeInTheDocument();
+    expect(container.firstElementChild?.className).not.toContain('pb-[calc');
+    expect(await screen.findByRole('navigation', { name: 'Primary' })).toBeInTheDocument();
+  });
+
+  it('pins the sticky mobile CTA and reserves matching bottom space once decided', async () => {
+    mockAnonymousSession();
+    window.localStorage.setItem(
+      'cpa.consent',
+      JSON.stringify({ analytics: false, decidedAt: '2026-11-19T10:00:00Z' }),
+    );
     const { container } = renderShell(PublicLayout);
 
     expect(await screen.findByRole('region', { name: 'Quick actions' })).toBeInTheDocument();
@@ -79,6 +95,26 @@ describe('PublicLayout', () => {
     expect(container.firstElementChild?.className).toContain(
       'pb-[calc(5rem_+_env(safe-area-inset-bottom))]',
     );
+  });
+
+  it('offers the legal routes and cookie preferences from the footer', async () => {
+    mockAnonymousSession();
+    renderShell(PublicLayout);
+
+    const footer = await screen.findByRole('contentinfo');
+    const legal = within(footer).getByRole('navigation', { name: 'Legal' });
+    expect(within(legal).getByRole('link', { name: 'Contact' })).toHaveAttribute('href', '/contact');
+    expect(within(legal).getByRole('link', { name: 'Privacy Policy' })).toHaveAttribute(
+      'href',
+      '/privacy',
+    );
+    expect(within(legal).getByRole('link', { name: 'Terms of Use' })).toHaveAttribute(
+      'href',
+      '/terms',
+    );
+    expect(
+      within(legal).getByRole('button', { name: 'Cookie preferences' }),
+    ).toBeInTheDocument();
   });
 });
 
@@ -108,6 +144,7 @@ describe('AdminLayout', () => {
     expect(nav).toHaveTextContent('Courses');
     expect(nav).toHaveTextContent('Content');
     expect(nav).toHaveTextContent('Announcements');
+    expect(nav).toHaveTextContent('Messages');
     expect(nav).toHaveTextContent('Audit log');
     expect(screen.getByText('Administration')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();

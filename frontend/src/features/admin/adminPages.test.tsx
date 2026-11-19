@@ -21,6 +21,7 @@ import type {
   RegistrationRequestResponse,
   StudentAdminResponse,
 } from './adminApi';
+import type { ContactMessageResponse } from './adminContactApi';
 
 function renderApp(initialPath: string) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -427,6 +428,27 @@ const auditEntries: AuditEntryResponse[] = [
   },
 ];
 
+const contactMessages: ContactMessageResponse[] = [
+  {
+    id: 'msg-unread',
+    name: 'Casey Caller',
+    email: 'casey@example.test',
+    subject: 'Question about paths',
+    message: 'How do the paths sequence?',
+    createdAt: '2026-11-18T09:30:00Z',
+    readAt: null,
+  },
+  {
+    id: 'msg-read',
+    name: 'Robin Reader',
+    email: 'robin@example.test',
+    subject: 'Enrollment receipt',
+    message: 'Thanks — my request went through.',
+    createdAt: '2026-11-17T15:00:00Z',
+    readAt: '2026-11-17T16:00:00Z',
+  },
+];
+
 interface RecordedCall {
   url: string;
   method: string;
@@ -436,6 +458,8 @@ interface RecordedCall {
 interface MockOptions {
   /** Answer course status changes with a 409 publish-cascade violation. */
   statusConflict?: boolean;
+  /** Answer the contact inbox with an empty list. */
+  emptyContactInbox?: boolean;
 }
 
 /**
@@ -445,6 +469,11 @@ interface MockOptions {
  */
 function mockAdminApi(options: MockOptions = {}) {
   const calls: RecordedCall[] = [];
+  // Phase 14: contact inbox — per-mock state so mark-read never leaks
+  // between tests that share the module-level fixtures.
+  const inbox: ContactMessageResponse[] = options.emptyContactInbox
+    ? []
+    : contactMessages.map((row) => ({ ...row }));
 
   vi.spyOn(globalThis, 'fetch').mockImplementation(async (input, init) => {
     const url = new URL(String(input), 'http://localhost');
@@ -690,6 +719,18 @@ function mockAdminApi(options: MockOptions = {}) {
       return jsonResponse(
         entityType ? auditEntries.filter((row) => row.entityType === entityType) : auditEntries,
       );
+    }
+
+    // Phase 14: contact inbox (state captured per mock above).
+    if (path === '/api/v1/admin/contact-messages') {
+      return jsonResponse(inbox);
+    }
+    const contactRead = match(/^\/api\/v1\/admin\/contact-messages\/([^/]+)\/read$/);
+    if (contactRead && method === 'POST') {
+      const found = inbox.find((row) => row.id === contactRead[1]);
+      if (!found) return jsonResponse(notFound(), 404);
+      if (!found.readAt) found.readAt = '2026-11-19T12:00:00Z';
+      return jsonResponse(found);
     }
 
     return jsonResponse({ message: 'Not found' }, 404);
@@ -1324,12 +1365,77 @@ describe('AdminAuditPage', () => {
  * column for screen readers. jsdom does no layout, so the scroll behaviour is
  * asserted through the wrapper the stylesheet hooks onto.
  */
+describe('AdminMessagesPage', () => {
+  it(
+    'lists the inbox with read state and marks an unread message read',
+    async () => {
+      mockAdminApi();
+      const user = userEvent.setup();
+
+      renderApp('/admin/messages');
+
+      expect(
+        await screen.findByRole('heading', { level: 1, name: 'Messages' }),
+      ).toBeInTheDocument();
+      expect(await screen.findByText('Question about paths')).toBeInTheDocument();
+      expect(screen.getByText('casey@example.test')).toBeInTheDocument();
+      expect(screen.getByText('How do the paths sequence?')).toBeInTheDocument();
+      expect(screen.getByText('Unread')).toBeInTheDocument();
+      expect(screen.getByText('Read')).toBeInTheDocument();
+
+      await user.click(screen.getByRole('button', { name: 'Mark read' }));
+
+      await waitFor(() => {
+        expect(screen.queryByRole('button', { name: 'Mark read' })).not.toBeInTheDocument();
+      });
+      expect(screen.getAllByText('Read')).toHaveLength(2);
+    },
+    30000,
+  );
+
+  it(
+    'renders an honest empty state when no messages exist',
+    async () => {
+      mockAdminApi({ emptyContactInbox: true });
+
+      renderApp('/admin/messages');
+
+      expect(
+        await screen.findByRole('heading', { level: 1, name: 'Messages' }),
+      ).toBeInTheDocument();
+      expect(await screen.findByText('No messages yet')).toBeInTheDocument();
+      expect(screen.getByText(/appear here for review/i)).toBeInTheDocument();
+      expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    },
+    30000,
+  );
+
+  it(
+    'stays out of the search index and exposes scoped, scrollable table columns',
+    async () => {
+      mockAdminApi();
+
+      renderApp('/admin/messages');
+
+      const table = await screen.findByRole('table');
+      expect(document.querySelector('meta[name="robots"]')?.getAttribute('content')).toBe(
+        'noindex, nofollow',
+      );
+      expect(table.parentElement).toHaveClass('overflow-x-auto');
+      for (const header of within(table).getAllByRole('columnheader')) {
+        expect(header).toHaveAttribute('scope', 'col');
+      }
+    },
+    30000,
+  );
+});
+
 describe('responsive data tables', () => {
   it(
     'wraps every admin table in a horizontal scroll container with scoped headers',
     async () => {
       mockAdminApi();
-      const routes = ['/admin/students', '/admin/courses', '/admin/content', '/admin/audit'];
+      const routes = ['/admin/students', '/admin/courses', '/admin/content', '/admin/messages', '/admin/audit'];
 
       for (const route of routes) {
         const view = renderApp(route);

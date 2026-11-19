@@ -27,6 +27,7 @@ Location: `backend/src/main/resources/db/migration/`. Versioned, additive-only s
 | `V3__phase5_content_management.sql` | `source_path` columns, import conflict staging (`proposed_body`, `resolved_at`, `resolved_by_id`), partial unique indexes |
 | `V4__phase8_assessments.sql` | `assessment_question.correct_text` (short-answer key) |
 | `V5__phase9_administration.sql` | `announcement.course_id` (null = platform-wide) + feed index |
+| `V6__phase14_contact_messages.sql` | `contact_message` table (public contact-form inbox: name, email, subject, message, `read_at`) + unread-first index |
 
 Rules:
 
@@ -43,7 +44,7 @@ Rules:
 | Enrollment | `course_enrollment` |
 | Progress | `lesson_progress` |
 | Assessments | `assessment`, `assessment_question`, `assessment_option`, `assessment_attempt`, `assessment_answer`, `assessment_answer_option` |
-| Communication | `announcement`, `notification` |
+| Communication | `announcement`, `notification`, `contact_message` |
 | Operations | `content_import`, `audit_log` |
 | Sessions | `SPRING_SESSION`, `SPRING_SESSION_ATTRIBUTES` (Spring Session JDBC) |
 

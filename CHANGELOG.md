@@ -121,5 +121,19 @@ All notable changes to CodePath-Academy are documented here. Format follows
   navigation; audit fixes — external links now carry `rel="noopener noreferrer"`, Markdown
   images gained `decoding="async"`, and keyboard focus visibility was verified live
   (`:focus-visible` → 2px solid accent-500).
+- Phase 14 privacy, consent, and contact: a public contact form (`/contact`, React Hook
+  Form + Zod) backed by `POST /api/v1/contact` — validated, CSRF-protected, ack-only 201
+  with no echoed data — storing messages in the new Flyway V6 `contact_message` table for
+  an administrator inbox at `/admin/messages` (unread-first list, idempotent mark-read);
+  a thank-you page at `/contact/thank-you` that states plainly the message is recorded for
+  review and does not guarantee a reply; indexable Privacy Policy (`/privacy`) and Terms of
+  Use (`/terms`) pages with unique meta, GDPR-style wording, and no invented contact details
+  (an optional `VITE_CONTACT_EMAIL` mailto is shown only when configured); a cookie notice
+  with an always-on essential category, an explicit analytics opt-in, and a preference
+  center re-openable from the footer — the choice persists in `localStorage` and gates a
+  pluggable analytics loader (`VITE_ANALYTICS_URL`, default off, name-only events, no PII);
+  the sticky mobile CTA now waits for the cookie decision so two fixed bars never stack;
+  and `docs/API.md`, `docs/DATABASE.md`, `docs/DEPLOYMENT.md` gained the contact/inbox,
+  V6, and CSP `script-src` notes.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main
