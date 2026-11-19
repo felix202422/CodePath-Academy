@@ -1,0 +1,54 @@
+name: Bug report
+description: Report a defect in CodePath-Academy (unexpected behavior, crash, data issue).
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug.
+        **Security issues must not be reported here** — follow [SECURITY.md](../SECURITY.md) instead.
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: Clear description of the observed behavior.
+      placeholder: On /admin/courses the publish button stayed disabled after the course reached PUBLISHED state…
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps, including the account role used (visitor/student/admin) where relevant.
+      placeholder: |
+        1. Sign in as an administrator
+        2. Open /admin/courses
+        3. …
+    validations:
+      required: true
+  - type: input
+    id: commit
+    attributes:
+      label: Commit or version
+      description: The commit SHA or release where you saw the bug.
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, browser, Node/Java/PostgreSQL versions, or "CI" if it failed in a workflow run.
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+        - label: This is not a security vulnerability (those go through SECURITY.md).
+          required: true

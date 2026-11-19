@@ -1,0 +1,31 @@
+name: Feature request
+description: Propose an improvement or new capability for CodePath-Academy.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem or opportunity
+      description: What learner, instructor, or administrator need does this address?
+      placeholder: Students who fail an assessment cannot retake it after the attempt limit…
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: What should change, and where (frontend, backend, docs, infrastructure)?
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      options:
+        - label: I understand deployment is preparation-only and cloud provisioning needs explicit authorization.
+        - label: I checked that no fabricated data or invented metrics would be required.

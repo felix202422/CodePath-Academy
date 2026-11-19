@@ -90,5 +90,13 @@ All notable changes to CodePath-Academy are documented here. Format follows
   `aria-expanded`/`aria-controls`, Modal focus trap and focus restoration, reduced-motion-aware
   ScrollReveal, horizontally scrollable admin tables with scoped column headers); and a CI
   dependency-audit gate (`npm audit --audit-level=critical`) closing CPA-003.
+- Phase 11 production preparation (part 1 — repository and operations readiness): MIT `LICENSE`,
+  `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `SECURITY.md` with private vulnerability reporting,
+  `.gitattributes` line-ending policy, GitHub issue/PR templates; `docs/DATABASE.md`,
+  `docs/API.md`, and `docs/DEPLOYMENT.md` (prepare-only status, production checklist, HTTP
+  caching policy, backup/restore runbook exercised against the live dev cluster); Nginx edge
+  caching (immutable hashed assets, revalidated HTML, 7-day images) with per-location security
+  headers, and a CI `nginx -t` validation step. Cloud provisioning and live deployment remain
+  excluded pending authorization.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

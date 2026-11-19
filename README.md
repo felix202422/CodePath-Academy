@@ -44,6 +44,15 @@ Prerequisites and verified local limitations are recorded in
 the Vite and Spring Boot development servers. A local PostgreSQL 18 server can be used where Docker
 is unavailable by setting the variables in `.env` from `.env.example`.
 
+## Contributing
+
+Read [`CONTRIBUTING.md`](CONTRIBUTING.md) before opening a pull request, follow
+[`CODE_OF_CONDUCT.md`](CODE_OF_CONDUCT.md) in all project spaces, and report vulnerabilities
+privately as described in [`SECURITY.md`](SECURITY.md). API and database references live in
+[`docs/API.md`](docs/API.md) and [`docs/DATABASE.md`](docs/DATABASE.md); deployment and backup
+procedures are in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md). The project is
+[MIT-licensed](LICENSE).
+
 ## Project status
 
 The phase-by-phase implementation register and real test results are maintained in

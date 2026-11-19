@@ -72,6 +72,15 @@ jobs:
     steps:
       - uses: actions/checkout@v5
       - uses: docker/setup-buildx-action@v3
+      # Validate the edge config before building: the dev machine has no nginx/docker,
+      # so CI is where syntax and cache-header policy are actually checked.
+      # --add-host supplies the compose service name nginx resolves at config-test time.
+      - name: Validate nginx configuration
+        run: >
+          docker run --rm
+          --add-host=backend:127.0.0.1
+          -v "$PWD/infra/docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro"
+          nginx:1.29-alpine nginx -t
       - uses: docker/build-push-action@v6
         with:
           context: backend
