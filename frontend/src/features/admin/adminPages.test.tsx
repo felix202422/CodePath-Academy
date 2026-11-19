@@ -1316,3 +1316,45 @@ describe('AdminAuditPage', () => {
     expect(screen.getByText('stu-suspended')).toBeInTheDocument();
   });
 });
+
+/**
+ * Phase 10 responsive/a11y contract for the data-dense admin screens: every
+ * table scrolls horizontally inside its own container instead of breaking the
+ * layout on a narrow viewport, and every column header is associated with its
+ * column for screen readers. jsdom does no layout, so the scroll behaviour is
+ * asserted through the wrapper the stylesheet hooks onto.
+ */
+describe('responsive data tables', () => {
+  it(
+    'wraps every admin table in a horizontal scroll container with scoped headers',
+    async () => {
+      mockAdminApi();
+      const routes = ['/admin/students', '/admin/courses', '/admin/content', '/admin/audit'];
+
+      for (const route of routes) {
+        const view = renderApp(route);
+        const tables = await screen.findAllByRole('table');
+        expect(tables.length, `${route} must render at least one data table`).toBeGreaterThan(0);
+
+        for (const table of tables) {
+          expect(
+            table.parentElement,
+            `${route}: the table wrapper must scroll horizontally`,
+          ).toHaveClass('overflow-x-auto');
+
+          const headers = within(table).getAllByRole('columnheader');
+          expect(headers.length, `${route}: table must have column headers`).toBeGreaterThan(0);
+          for (const header of headers) {
+            expect(header, `${route}: column header must be scoped`).toHaveAttribute(
+              'scope',
+              'col',
+            );
+          }
+        }
+
+        view.unmount();
+      }
+    },
+    30000,
+  );
+});

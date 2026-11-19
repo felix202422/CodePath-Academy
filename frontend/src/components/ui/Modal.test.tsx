@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useState } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Modal } from './Modal';
 
@@ -59,5 +60,71 @@ describe('Modal', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Close dialog' }));
 
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+/**
+ * Phase 10 focus contract: opening moves focus into the dialog, Tab cannot
+ * walk focus out into the page behind it, and closing gives focus back to the
+ * control that opened it. jsdom performs no layout, so the trap's visibility
+ * filter treats the focused node as the only candidate — the assertion below
+ * therefore proves focus never escapes, which is the property that matters.
+ */
+function FocusHarness() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div>
+      <button type="button" onClick={() => setOpen(true)}>
+        Review request
+      </button>
+      <Modal
+        open={open}
+        onClose={() => setOpen(false)}
+        title="Reject enrollment request"
+        footer={
+          <button type="button" onClick={() => setOpen(false)}>
+            Cancel
+          </button>
+        }
+      >
+        <p>Confirm rejecting this student&apos;s request.</p>
+      </Modal>
+    </div>
+  );
+}
+
+describe('Modal focus management', () => {
+  it('moves focus into the dialog when it opens', async () => {
+    render(<FocusHarness />);
+    await userEvent.click(screen.getByRole('button', { name: 'Review request' }));
+
+    const dialog = screen.getByRole('dialog');
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+  });
+
+  it('keeps Tab and Shift+Tab inside the dialog while it is open', async () => {
+    render(<FocusHarness />);
+    await userEvent.click(screen.getByRole('button', { name: 'Review request' }));
+    const dialog = screen.getByRole('dialog');
+
+    for (let step = 0; step < 4; step += 1) {
+      await userEvent.tab();
+      expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    }
+    await userEvent.tab({ shift: true });
+    expect(dialog).toContainElement(document.activeElement as HTMLElement);
+    // The page behind the dialog is never focused instead.
+    expect(document.activeElement).not.toBe(screen.getByRole('button', { name: 'Review request' }));
+  });
+
+  it('restores focus to the trigger after the dialog closes', async () => {
+    render(<FocusHarness />);
+    const trigger = screen.getByRole('button', { name: 'Review request' });
+    await userEvent.click(trigger);
+
+    await userEvent.keyboard('{Escape}');
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    expect(document.activeElement).toBe(trigger);
   });
 });

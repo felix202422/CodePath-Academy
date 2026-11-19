@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router';
@@ -100,5 +100,74 @@ describe('AdminLayout', () => {
     expect(nav).toHaveTextContent('Audit log');
     expect(screen.getByText('Administration')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+  });
+});
+
+/**
+ * Phase 10 responsive contract: every shell shares one disclosure pattern on
+ * small screens — a toggle wired to the panel through aria-expanded and
+ * aria-controls, keyboard-operable, closing again once a destination is chosen.
+ */
+describe('responsive navigation disclosure', () => {
+  it('opens the student menu from the keyboard and closes it after a choice', async () => {
+    mockAnonymousSession();
+    renderShell(StudentLayout, '/student');
+
+    const toggle = await screen.findByRole('button', { name: 'Open navigation menu' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(toggle).toHaveAttribute('aria-controls', 'site-nav-panel');
+
+    toggle.focus();
+    await userEvent.keyboard('{Enter}');
+
+    const panel = screen.getByRole('navigation', { name: 'Primary mobile' });
+    expect(panel).toHaveAttribute('id', 'site-nav-panel');
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: 'Close navigation menu' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+    expect(within(panel).getByRole('link', { name: 'My learning' })).toBeInTheDocument();
+
+    await userEvent.click(within(panel).getByRole('link', { name: 'My learning' }));
+
+    expect(screen.queryByRole('navigation', { name: 'Primary mobile' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Open navigation menu' })).toHaveAttribute(
+      'aria-expanded',
+      'false',
+    );
+  });
+
+  it('uses the same disclosure for the dense admin navigation', async () => {
+    mockAnonymousSession();
+    renderShell(AdminLayout, '/admin');
+
+    const toggle = await screen.findByRole('button', { name: 'Open navigation menu' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(toggle);
+
+    const panel = screen.getByRole('navigation', { name: 'Primary mobile' });
+    expect(within(panel).getByRole('link', { name: 'Audit log' })).toBeInTheDocument();
+    // The panel carries the actions the inline header hides on small screens.
+    expect(within(panel).getByRole('button', { name: 'Sign out' })).toBeInTheDocument();
+
+    await userEvent.click(within(panel).getByRole('link', { name: 'Students' }));
+
+    expect(screen.queryByRole('navigation', { name: 'Primary mobile' })).not.toBeInTheDocument();
+  });
+
+  it('marks the current destination with aria-current for assistive tech', async () => {
+    mockAnonymousSession();
+    renderShell(StudentLayout, '/student/learning');
+
+    const nav = await screen.findByRole('navigation', { name: 'Primary' });
+    expect(within(nav).getByRole('link', { name: 'My learning' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    );
+    expect(within(nav).getByRole('link', { name: 'Dashboard' })).not.toHaveAttribute(
+      'aria-current',
+    );
   });
 });
