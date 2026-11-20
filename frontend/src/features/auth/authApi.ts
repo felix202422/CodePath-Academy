@@ -15,6 +15,15 @@ export interface LoginInput {
   password: string;
 }
 
+export interface ChangePasswordInput {
+  currentPassword: string;
+  newPassword: string;
+}
+
+export interface ChangePasswordResult {
+  message: string;
+}
+
 export interface RegistrationInput {
   fullName: string;
   email: string;
@@ -54,6 +63,14 @@ export function register(input: RegistrationInput): Promise<RegistrationResult> 
 
 export function logout(): Promise<void> {
   return apiFetch<void>('/api/v1/auth/logout', { method: 'POST' });
+}
+
+/** Self-service password change for the signed-in account (CSRF enforced). */
+export function changePassword(input: ChangePasswordInput): Promise<ChangePasswordResult> {
+  return apiFetch<ChangePasswordResult>('/api/v1/auth/change-password', {
+    method: 'POST',
+    body: input,
+  });
 }
 
 export function homeForRole(role: UserRole): '/student' | '/admin' {

@@ -64,6 +64,7 @@ stored data. Contact messages are read only through the admin inbox below.
 | POST | `/api/v1/registration` | Submit a student registration (creates `PENDING`) |
 | POST | `/api/v1/auth/login` | Sign in; refuses non-`ACTIVE` accounts with an honest reason |
 | GET | `/api/v1/auth/me` | Current session user, or 401 |
+| POST | `/api/v1/auth/change-password` | Self-service password change (authenticated; re-proves the current password with a field-scoped 400, enforces the 8–72 policy, never echoes either password, keeps the session signed in) |
 | POST | `/api/v1/auth/logout` | End the session (configured in `SecurityConfig`) |
 
 ### Student (`ROLE_STUDENT`, ownership-scoped)

@@ -1,5 +1,7 @@
 package com.codepath.academy.identity.api;
 
+import com.codepath.academy.identity.api.dto.ChangePasswordRequest;
+import com.codepath.academy.identity.api.dto.ChangePasswordResponse;
 import com.codepath.academy.identity.api.dto.LoginRequest;
 import com.codepath.academy.identity.api.dto.SessionUserResponse;
 import com.codepath.academy.identity.service.AuthService;
@@ -55,5 +57,18 @@ public class AuthController {
     @GetMapping("/me")
     public SessionUserResponse me(Authentication authentication) {
         return authService.getSessionUser(authentication.getName());
+    }
+
+    /**
+     * Self-service password change for the signed-in account (any role).
+     * SecurityConfig requires authentication for this path explicitly — the
+     * neighbouring /api/v1/auth/** permitAll wildcard must not reach it.
+     */
+    @PostMapping("/change-password")
+    public ChangePasswordResponse changePassword(@Valid @RequestBody ChangePasswordRequest request,
+                                                 Authentication authentication) {
+        authService.changePassword(authentication.getName(),
+                request.currentPassword(), request.newPassword());
+        return new ChangePasswordResponse("Password updated.");
     }
 }

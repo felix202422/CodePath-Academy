@@ -102,8 +102,11 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ApiException.class)
     public ResponseEntity<ApiError> handleApiException(ApiException ex, HttpServletRequest request) {
+        // fieldErrors stays empty for ordinary ApiException calls and carries
+        // form-scoped messages (e.g. a wrong current password) when present.
         return ResponseEntity.status(ex.status()).body(ApiError.of(
-                ex.status().value(), ex.error(), ex.getMessage(), request.getRequestURI()));
+                ex.status().value(), ex.error(), ex.getMessage(), request.getRequestURI(),
+                ex.fieldErrors()));
     }
 
     @ExceptionHandler(Exception.class)

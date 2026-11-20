@@ -152,5 +152,19 @@ All notable changes to CodePath-Academy are documented here. Format follows
   alone. Lighthouse now reports 100/100/100 (accessibility, best practices, SEO) with
   zero failures on `/`, `/courses/computer-foundations`, and
   `/paths/software-engineering`.
+- Phase 3 gap fix: the student Profile screen (`/student/profile`) was still the
+  Phase 2 placeholder claiming "Phase 3 delivers this screen". It now shows the
+  signed-in account details (name, email, role, status) plus a real self-service
+  password change backed by `POST /api/v1/auth/change-password` — authenticated
+  via an explicit `SecurityConfig` matcher (the neighbouring `/api/v1/auth/**`
+  permitAll wildcard must never reach it), re-proving the current password with
+  a field-scoped 400 on mismatch, enforcing the same 8–72 policy as
+  registration, rejecting a reused password, clearing stale failed-login
+  counters on success, and keeping the current session signed in (stated
+  honestly on the page; other devices stay signed in until they sign out).
+  `ApiException` gained an optional field-error map so form-scoped failures
+  ride the standard `ApiError` contract. Covered by `ChangePasswordApiTest`
+  (7) and `studentProfilePage.test.tsx` (6); the unused `PlaceholderPage`
+  component was removed.
 
 [Unreleased]: https://github.com/felix202422/CodePath-Academy/commits/main

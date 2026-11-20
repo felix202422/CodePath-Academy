@@ -10,11 +10,22 @@ public class ApiException extends RuntimeException {
 
     private final HttpStatus status;
     private final String error;
+    private final java.util.Map<String, String> fieldErrors;
 
     public ApiException(HttpStatus status, String error, String message) {
+        this(status, error, message, java.util.Map.of());
+    }
+
+    /**
+     * Failure scoped to specific request fields (for example a wrong current
+     * password) so the SPA can attach the message to the right form control.
+     */
+    public ApiException(HttpStatus status, String error, String message,
+                        java.util.Map<String, String> fieldErrors) {
         super(message);
         this.status = status;
         this.error = error;
+        this.fieldErrors = java.util.Map.copyOf(fieldErrors);
     }
 
     public static ApiException notFound(String message) {
@@ -39,5 +50,9 @@ public class ApiException extends RuntimeException {
 
     public String error() {
         return error;
+    }
+
+    public java.util.Map<String, String> fieldErrors() {
+        return fieldErrors;
     }
 }

@@ -80,6 +80,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // /me must be checked before the /auth/** wildcard below.
                         .requestMatchers("/api/v1/auth/me").authenticated()
+                        // Password change is self-service but must never be
+                        // anonymous: also checked before the /auth/** wildcard.
+                        .requestMatchers("/api/v1/auth/change-password").authenticated()
                         .requestMatchers(
                                 "/api/v1/health",
                                 "/api/v1/auth/**",

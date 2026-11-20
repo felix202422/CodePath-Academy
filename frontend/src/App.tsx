@@ -17,7 +17,6 @@ import { ContactPage } from './features/contact/ContactPage';
 import { ContactSuccessPage } from './features/contact/ContactSuccessPage';
 import { PrivacyPage } from './features/legal/PrivacyPage';
 import { TermsPage } from './features/legal/TermsPage';
-import { PlaceholderPage } from './features/shared/PlaceholderPage';
 import { AdminContentPage } from './features/admin/AdminContentPage';
 import { AdminCourseDetailPage } from './features/admin/AdminCourseDetailPage';
 import { AdminCoursesPage } from './features/admin/AdminCoursesPage';
@@ -35,6 +34,7 @@ import { TakeAssessmentPage } from './features/student/TakeAssessmentPage';
 import { AssessmentResultPage } from './features/student/AssessmentResultPage';
 import { StudentCoursePage } from './features/student/StudentCoursePage';
 import { StudentDashboardPage } from './features/student/StudentDashboardPage';
+import { ProfilePage } from './features/student/ProfilePage';
 import { LoginPage } from './features/auth/LoginPage';
 import { RegisterPage } from './features/auth/RegisterPage';
 import { RegisterSuccessPage } from './features/auth/RegisterSuccessPage';
@@ -98,16 +98,7 @@ export default function App() {
           <Route path="assessments" element={<MyAssessmentsPage />} />
           <Route path="assessments/attempts/:attemptId" element={<AssessmentResultPage />} />
           <Route path="assessments/:assessmentId" element={<TakeAssessmentPage />} />
-          <Route
-            path="profile"
-            element={
-              <PlaceholderPage
-                title="Profile"
-                phase="Phase 3 — Authentication and security"
-                description="Account details and password changes. Enrollment requests are listed separately in My enrollments."
-              />
-            }
-          />
+          <Route path="profile" element={<ProfilePage />} />
           <Route path="*" element={<NotFoundPage />} />
         </Route>
       </Route>
